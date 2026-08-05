@@ -1,0 +1,134 @@
+/* ======================================
+   STATS CARD
+====================================== */
+
+.stats-card{
+    background:#d88350;
+    border-radius:12px;
+    padding:16px 18px;
+    box-shadow:0 4px 12px rgba(0,0,0,.18);
+    transition:.3s;
+}
+
+.stats-card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 10px 22px rgba(0,0,0,.25);
+}
+
+/* ======================================
+   TOP
+====================================== */
+
+.stats-top{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+}
+
+/* ======================================
+   ICON
+====================================== */
+
+.stats-icon{
+    width:40px;
+    height:40px;
+    border-radius:6px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    color:white;
+    font-size:22px;
+}
+
+/* ======================================
+   INFO
+====================================== */
+
+.stats-info{
+    text-align:center;
+    flex:1;
+}
+
+.stats-info h2{
+    margin:0;
+    font-size:42px;
+    color:#111;
+    font-weight:700;
+    line-height:1;
+}
+
+.stats-info p{
+    margin-top:4px;
+    font-size:13px;
+    color:#222;
+}
+
+/* ======================================
+   PROGRESS
+====================================== */
+
+.progress{
+    width:100%;
+    height:6px;
+    background:#ececec;
+    border-radius:30px;
+    margin-top:14px;
+    overflow:hidden;
+}
+
+.progress-fill{
+    height:100%;
+    border-radius:30px;
+}
+
+/* ======================================
+   TITLE
+====================================== */
+
+.stats-title{
+    margin-top:12px;
+    font-size:22px;
+    color:#111;
+    text-align:center;
+    font-weight:600;
+}
+
+/* ======================================
+   RESPONSIVE
+====================================== */
+
+@media(max-width:1200px){
+
+.stats-info h2{
+font-size:34px;
+}
+
+.stats-title{
+font-size:18px;
+}
+
+}
+
+@media(max-width:768px){
+
+.stats-card{
+padding:14px;
+}
+
+.stats-info h2{
+font-size:28px;
+}
+
+.stats-title{
+font-size:16px;
+}
+
+.stats-icon{
+width:36px;
+height:36px;
+font-size:18px;
+}
+
+}

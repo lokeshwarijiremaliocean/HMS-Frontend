@@ -1,0 +1,150 @@
+/* ===========================
+   HOSTEL PAGE
+=========================== */
+
+.hostel-page{
+    width:100%;
+    min-height:100vh;
+    background:#f8f9fb;
+}
+
+
+/* ===========================
+   HERO SECTION
+=========================== */
+
+.hostel-hero{
+
+    width:100%;
+    height:100vh;
+
+    background-position:center;
+    background-size:cover;
+    background-repeat:no-repeat;
+
+    display:flex;
+    align-items:center;
+
+    padding-left:9%;
+
+    position:relative;
+
+}
+
+
+.hero-content{
+
+    color:white;
+    max-width:650px;
+
+}
+
+
+.hero-content h1{
+
+    font-size:70px;
+    line-height:1.1;
+    margin-bottom:25px;
+    font-weight:700;
+
+}
+
+
+.hero-content p{
+
+    font-size:22px;
+    line-height:1.8;
+    color:#f2f2f2;
+
+}
+
+
+.hero-buttons{
+
+    display:flex;
+    gap:20px;
+    margin-top:45px;
+
+}
+
+
+.btn-primary{
+
+    background:#ff9f1a;
+    color:white;
+
+    border:none;
+
+    padding:18px 45px;
+
+    border-radius:50px;
+
+    font-size:18px;
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+}
+
+
+.btn-primary:hover{
+
+    background:#ff8300;
+    transform:translateY(-4px);
+
+}
+
+
+.btn-outline{
+
+    background:transparent;
+
+    color:white;
+
+    border:2px solid white;
+
+    padding:18px 45px;
+
+    border-radius:50px;
+
+    font-size:18px;
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+}
+
+
+.btn-outline:hover{
+
+    background:white;
+    color:#222;
+
+}
+
+
+@media(max-width:768px){
+
+.hero-content h1{
+
+font-size:45px;
+
+}
+
+.hero-content p{
+
+font-size:18px;
+
+}
+
+.hero-buttons{
+
+flex-direction:column;
+
+}
+
+}
