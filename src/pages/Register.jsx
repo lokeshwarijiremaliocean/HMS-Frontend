@@ -36,12 +36,6 @@ function Register() {
             className="register-input"
           />
 
-          <input
-            type="password"
-            placeholder="Confirm Password"
-            className="register-input"
-          />
-
           <button
               className="register-btn"
               onClick={() => navigate("/dashboard")}

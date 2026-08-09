@@ -6,14 +6,10 @@ import {
   MdDashboard,
   MdPersonAdd,
   MdGroups,
-  MdSearch,
   MdMeetingRoom,
   MdPersonPin,
   MdBed,
   MdApartment,
-  MdAttachMoney,
-  MdSettings,
-  MdAssessment,
   MdLogout,
   MdKeyboardArrowDown,
 } from "react-icons/md";
@@ -45,11 +41,6 @@ function Sidebar() {
           <span>View Student</span>
         </div>
 
-        <div className="menu-item">
-          <MdSearch />
-          <span>Search Students</span>
-        </div>
-
         <h4>
           ROOM MANAGEMENT
           <MdKeyboardArrowDown className="arrow" />
@@ -73,23 +64,6 @@ function Sidebar() {
         <div className="menu-item">
           <MdApartment />
           <span>Floor Search</span>
-        </div>
-
-        <div className="menu-item">
-          <MdAttachMoney />
-          <span>Expenses</span>
-        </div>
-
-        <div className="menu-item">
-          <MdSettings />
-          <span>Settings</span>
-        </div>
-
-        <h4>OTHER</h4>
-
-        <div className="menu-item">
-          <MdAssessment />
-          <span>Reports</span>
         </div>
 
       </div>

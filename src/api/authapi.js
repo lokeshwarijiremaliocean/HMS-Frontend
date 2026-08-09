@@ -1,16 +1,16 @@
-import axios from "axios";
-
-const API = "http://127.0.0.1:8000";
+import apiClient from "./axiosInstance";
 
 export const sendOTP = async (email) => {
-  return axios.post(`${API}/send-otp`, {
+  return apiClient.post("/send-otp", {
     email,
   });
 };
 
 export const verifyOTP = async (email, otp) => {
-  return axios.post(`${API}/verify-otp`, {
+  return apiClient.post("/verify-otp", {
     email,
     otp,
   });
 };
+
+export default apiClient;

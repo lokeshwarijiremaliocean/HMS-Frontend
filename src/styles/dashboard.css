@@ -15,7 +15,56 @@
 }
 
 /* ======================================
-   STATS
+   SEARCH BAR BELOW HEADER
+====================================== */
+
+.dashboard-search-container {
+    margin-top: 20px;
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: center;
+}
+
+.dashboard-search-bar {
+    width: 100%;
+    max-width: 680px;
+    height: 48px;
+    background: #ffffff;
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 12px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+.dashboard-search-bar:focus-within {
+    box-shadow: 0 5px 16px rgba(0,0,0,0.12);
+    border-color: #cbd5e1;
+}
+
+.dashboard-search-bar .search-icon {
+    font-size: 22px;
+    color: #64748b;
+}
+
+.dashboard-search-bar input {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 15px;
+    color: #1e293b;
+}
+
+.dashboard-search-bar input::placeholder {
+    color: #94a3b8;
+}
+
+/* ======================================
+   STATS (5 CARDS UNCHANGED)
 ====================================== */
 
 .stats-grid{
@@ -26,12 +75,12 @@
 }
 
 /* ======================================
-   FEATURES
+   FEATURES (3 + 2 GRID)
 ====================================== */
 
 .feature-grid{
     display:grid;
-    grid-template-columns:repeat(4,1fr);
+    grid-template-columns:repeat(3, 1fr);
     gap:24px;
 }
 
@@ -42,10 +91,6 @@
 @media (max-width:1400px){
 
 .stats-grid{
-grid-template-columns:repeat(3,1fr);
-}
-
-.feature-grid{
 grid-template-columns:repeat(3,1fr);
 }
 

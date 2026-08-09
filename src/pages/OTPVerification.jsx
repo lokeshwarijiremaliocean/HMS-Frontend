@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import axios from "axios";
+import { verifyOTP } from "../api/authapi";
 
 import "../styles/auth.css";
 
@@ -64,16 +64,14 @@ function OTPVerification() {
     try {
 
 
-      const response = await axios.post(
-        "http://127.0.0.1:8000/verify-otp",
-        {
-          email: email,
-          otp: finalOTP
-        }
-      );
+      const response = await verifyOTP(email, finalOTP);
 
 
       console.log(response.data);
+
+      if (response.data && response.data.access_token) {
+        localStorage.setItem("access_token", response.data.access_token);
+      }
 
 
       alert("OTP Verified Successfully");
@@ -88,6 +86,7 @@ function OTPVerification() {
 
       console.log(error);
 
+      localStorage.removeItem("access_token");
 
       alert("Invalid OTP");
 
