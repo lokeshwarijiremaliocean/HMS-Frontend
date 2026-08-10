@@ -1,0 +1,428 @@
+/* ======================================
+   HOSTEL MANAGEMENT PAGE
+====================================== */
+
+.hostel-management-container {
+  display: flex;
+  min-height: 100vh;
+  background: #edf1f7;
+}
+
+.hostel-management-main {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+
+/* ======================================
+   HOSTEL NAVBAR
+====================================== */
+
+.hostel-navbar {
+  height: 74px;
+  background: #ffffff;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 26px;
+  box-shadow: 0 3px 12px rgba(0,0,0,.15);
+}
+
+.hostel-navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.hostel-navbar-left .hm-menu-icon {
+  font-size: 38px;
+  cursor: pointer;
+  color: #222;
+}
+
+.hostel-navbar-left .hm-title-group h1 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #222;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.hostel-navbar-left .hm-title-group p {
+  font-size: 13px;
+  color: #888;
+  margin: 0;
+}
+
+.hostel-navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.hostel-navbar-right .hm-notification {
+  position: relative;
+  font-size: 34px;
+  cursor: pointer;
+  color: #111;
+}
+
+.hostel-navbar-right .hm-badge {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  background: red;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.hostel-navbar-right .hm-admin-image {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.hostel-navbar-right .hm-admin-info h4 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111;
+  margin: 0 0 2px 0;
+}
+
+.hostel-navbar-right .hm-admin-info p {
+  font-size: 13px;
+  color: #666;
+  margin: 0;
+}
+
+.hostel-navbar-right .hm-dropdown-icon {
+  font-size: 28px;
+  cursor: pointer;
+  color: #333;
+}
+
+
+/* ======================================
+   ACTION CARDS (Top Row)
+====================================== */
+
+.hm-action-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 24px;
+  margin-bottom: 28px;
+}
+
+.hm-action-card {
+  padding: 22px 26px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  min-height: 90px;
+  border: 2px solid transparent;
+}
+
+.hm-action-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,0,0,.15);
+}
+
+.hm-action-card.active {
+  box-shadow: 0 0 0 4px #222, 0 8px 24px rgba(0,0,0,.25);
+  transform: translateY(-3px);
+}
+
+/* Add Hostel Card */
+.hm-action-card.add-card {
+  background: linear-gradient(135deg, #e8533e 0%, #f2845a 100%);
+  border-color: #e8533e;
+  color: #fff;
+}
+
+/* Search Hostel Card */
+.hm-action-card.search-card {
+  background: linear-gradient(135deg, #2196F3 0%, #64B5F6 100%);
+  border-color: #2196F3;
+  color: #fff;
+}
+
+/* Delete Hostel Card */
+.hm-action-card.delete-card {
+  background: linear-gradient(135deg, #6D3A2B 0%, #A0674F 100%);
+  border-color: #6D3A2B;
+  color: #fff;
+}
+
+.hm-delete-btn {
+  background: #d32f2f !important;
+}
+
+.hm-delete-btn:hover {
+  background: #b71c1c !important;
+}
+
+.hm-result-card {
+  margin-top: 24px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.hm-result-card h3 {
+  margin-top: 0;
+  color: #1e293b;
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+.hm-result-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.hm-result-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.hm-result-item span.label {
+  font-size: 12px;
+  color: #64748b;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.hm-result-item span.val {
+  font-size: 15px;
+  color: #0f172a;
+  font-weight: 500;
+}
+
+.hm-action-card .hm-card-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  flex-shrink: 0;
+}
+
+.hm-action-card .hm-card-text h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 3px 0;
+}
+
+.hm-action-card .hm-card-text p {
+  font-size: 13px;
+  margin: 0;
+  opacity: .85;
+}
+
+.hm-action-card .hm-card-arrow {
+  margin-left: auto;
+  font-size: 24px;
+  opacity: .7;
+  flex-shrink: 0;
+}
+
+
+/* ======================================
+   ADD HOSTEL FORM
+====================================== */
+
+.hm-form-section {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 30px 32px;
+  box-shadow: 0 3px 12px rgba(0,0,0,.08);
+}
+
+.hm-form-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 6px;
+}
+
+.hm-form-header .hm-form-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #eaf7ef;
+  color: #4CAF50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.hm-form-header h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #222;
+  margin: 0;
+}
+
+.hm-form-subtitle {
+  font-size: 14px;
+  color: #888;
+  margin: 0 0 28px 54px;
+}
+
+.hm-alert {
+  padding: 12px 18px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.hm-alert.success {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+}
+
+.hm-alert.error {
+  background: #ffebee;
+  color: #c62828;
+  border: 1px solid #ef9a9a;
+}
+
+.hm-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+}
+
+.hm-form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.hm-form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.hm-form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.hm-form-group label span {
+  color: #e53935;
+}
+
+.hm-form-group input {
+  height: 48px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 0 16px;
+  font-size: 15px;
+  color: #333;
+  background: #fff;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  outline: none;
+  font-family: "Poppins", sans-serif;
+}
+
+.hm-form-group input::placeholder {
+  color: #bbb;
+}
+
+.hm-form-group input:focus {
+  border-color: #D07A4E;
+  box-shadow: 0 0 0 3px rgba(208,122,78,.15);
+}
+
+.hm-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 28px;
+}
+
+.hm-add-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #e8533e;
+  color: #fff;
+  border: none;
+  padding: 14px 32px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+  font-family: "Poppins", sans-serif;
+}
+
+.hm-add-btn:hover {
+  background: #d14430;
+  transform: translateY(-2px);
+}
+
+.hm-add-btn svg {
+  font-size: 20px;
+}
+
+
+/* ======================================
+   RESPONSIVE
+====================================== */
+
+@media (max-width: 1100px) {
+
+  .hm-action-cards {
+    grid-template-columns: 1fr 1fr;
+  }
+
+}
+
+@media (max-width: 768px) {
+
+  .hostel-management-container {
+    flex-direction: column;
+  }
+
+  .hm-action-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .hm-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hostel-navbar {
+    border-radius: 0;
+  }
+
+  .hostel-management-main {
+    padding: 16px;
+  }
+
+}

@@ -26,21 +26,22 @@ import "../styles/dashboard.css";
 function Dashboard() {
   const [totalStudents, setTotalStudents] = useState(0);
 
-useEffect(() => {
-  const fetchStudents = async () => {
-    try {
-      const response = await apiClient.get("/student");
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        const response = await apiClient.get("/student");
 
-      if (response.data.success) {
-        setTotalStudents(response.data.data.length);
+        if (response.data && response.data.success && Array.isArray(response.data.data)) {
+          setTotalStudents(response.data.data.length);
+        }
+      } catch (error) {
+        // Backend GET /student currently requires a roll_no parameter (GET /student?roll_no=...)
+        console.warn("Could not fetch all students list (Backend API requires specific roll_no parameter):", error.response?.data?.detail || error.message);
       }
-    } catch (error) {
-      console.error("Failed to fetch students:", error);
-    }
-  };
+    };
 
-  fetchStudents();
-}, []);
+    fetchStudents();
+  }, []);
   return (
     <div className="dashboard-container">
 

@@ -7,7 +7,7 @@ import LeftPanel from "../components/auth/LeftPanel";
 import InputField from "../components/auth/InputField";
 import Button from "../components/auth/Button";
 
-import { sendOTP } from "../api/authApi";
+import { sendOTP } from "../api/authapi";
 
 function EmailVerification() {
 

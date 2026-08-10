@@ -67,10 +67,9 @@ function OTPVerification() {
       const response = await verifyOTP(email, finalOTP);
 
 
-      console.log(response.data);
-
-      if (response.data && response.data.access_token) {
-        localStorage.setItem("access_token", response.data.access_token);
+      const token = response.data?.access_token || response.data?.data?.access_token;
+      if (token) {
+        localStorage.setItem("access_token", token);
       }
 
 
