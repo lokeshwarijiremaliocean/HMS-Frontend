@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import apiClient from "../api/axiosInstance";
 
 import {
@@ -8,6 +9,7 @@ import {
   MdHotel,
   MdBed,
   MdSearch,
+  MdApartment,
 } from "react-icons/md";
 
 import hostel from "../assets/hostel.png";
@@ -23,9 +25,57 @@ import FeatureCard from "../components/dashboard/FeatureCard";
 
 import "../styles/dashboard.css";
 
+const SEARCH_CATEGORIES = [
+  {
+    id: "students",
+    title: "Students",
+    subtitle: "View Student",
+    icon: <MdPeople />,
+    route: null,
+    keywords: ["student", "students", "view student", "add student", "stu"],
+  },
+  {
+    id: "rooms",
+    title: "Rooms",
+    subtitle: "View Rooms",
+    icon: <MdMeetingRoom />,
+    route: null,
+    keywords: ["room", "rooms", "view rooms", "roo"],
+  },
+  {
+    id: "hostel",
+    title: "Hostel",
+    subtitle: "Hostel Management",
+    icon: <MdHome />,
+    route: "/hostel",
+    keywords: ["hostel", "hostels", "host"],
+  },
+  {
+    id: "floor",
+    title: "Floor",
+    subtitle: "Floor Search",
+    icon: <MdApartment />,
+    route: null,
+    keywords: ["floor", "floors", "flo", "floor search"],
+  },
+  {
+    id: "bed",
+    title: "Bed Info",
+    subtitle: "Allocate Bed",
+    icon: <MdBed />,
+    route: null,
+    keywords: ["bed", "beds", "bed info", "allocate bed", "bea"],
+  },
+];
+
 function Dashboard() {
   const [totalStudents, setTotalStudents] = useState(0);
-  const [totalRooms, setTotalRooms] = useState(0);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  const searchRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -36,15 +86,6 @@ function Dashboard() {
         if (studentResponse.data.success) {
           setTotalStudents(studentResponse.data.data.length);
         }
-
-        // Get Rooms
-        const roomResponse = await apiClient.get("/room");
-
-        console.log("ROOM RESPONSE:", roomResponse.data);
-
-        if (roomResponse.data.success) {
-          setTotalRooms(roomResponse.data.data.length);
-        }
       } catch (error) {
         console.error("Failed to fetch dashboard data:", error);
       }
@@ -53,32 +94,112 @@ function Dashboard() {
     fetchDashboardData();
   }, []);
 
+  // Handle click outside and Escape key for search dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setIsSearchOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setIsSearchOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
+  const query = searchTerm.trim().toLowerCase();
+  const searchResults =
+    query === ""
+      ? []
+      : SEARCH_CATEGORIES.filter((item) => {
+          const titleMatch = item.title.toLowerCase().includes(query);
+          const subtitleMatch = item.subtitle.toLowerCase().includes(query);
+          const keywordMatch = item.keywords.some((kw) =>
+            kw.toLowerCase().includes(query)
+          );
+          return titleMatch || subtitleMatch || keywordMatch;
+        });
+
+  const handleSelectResult = (result) => {
+    setIsSearchOpen(false);
+    setSearchTerm("");
+
+    if (result.route) {
+      navigate(result.route);
+    } else {
+      alert(`${result.title} page coming soon!`);
+    }
+  };
+
   return (
     <div className="dashboard-container">
-
       {/* Sidebar */}
-      <Sidebar />
+      <Sidebar isOpen={sidebarOpen} />
 
       <main className="dashboard-main">
-
         {/* Navbar */}
-        <Navbar />
+        <Navbar onToggleSidebar={() => setSidebarOpen((prev) => !prev)} />
 
         {/* Search Bar */}
         <div className="dashboard-search-container">
-          <div className="dashboard-search-bar">
-            <MdSearch className="search-icon" />
+          <div className="dashboard-search-wrapper" ref={searchRef}>
+            <div className="dashboard-search-bar">
+              <MdSearch className="search-icon" />
 
-            <input
-              type="text"
-              placeholder="Search students, rooms, hostels..."
-            />
+              <input
+                type="text"
+                placeholder="Search students, rooms, hostels..."
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setIsSearchOpen(true);
+                }}
+                onFocus={() => setIsSearchOpen(true)}
+              />
+            </div>
+
+            {/* Search Dropdown */}
+            {searchTerm.trim() !== "" && isSearchOpen && (
+              <div className="search-results-dropdown">
+                <div className="search-results-header">Search results</div>
+
+                {searchResults.length > 0 ? (
+                  searchResults.map((result) => (
+                    <div
+                      key={result.id}
+                      className="search-result-item"
+                      onClick={() => handleSelectResult(result)}
+                    >
+                      <div className="search-result-icon">{result.icon}</div>
+                      <div className="search-result-info">
+                        <span className="search-result-title">
+                          {result.title}
+                        </span>
+                        <span className="search-result-subtitle">
+                          {result.subtitle}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="no-results-found">No results found</div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
         {/* Statistics */}
         <section className="stats-grid">
-
           {/* Total Students */}
           <StatsCard
             icon={<MdPeople />}
@@ -93,7 +214,7 @@ function Dashboard() {
           <StatsCard
             icon={<MdHome />}
             title="TOTAL ROOMS"
-            value={totalRooms}
+            value="100"
             subtitle="10 Floors"
             percentage={100}
             color="#4CAF50"
@@ -128,12 +249,10 @@ function Dashboard() {
             percentage={83}
             color="#00BCD4"
           />
-
         </section>
 
         {/* Feature Cards */}
         <section className="feature-grid">
-
           <FeatureCard
             title="Hostel"
             subtitle="Enter"
@@ -168,9 +287,7 @@ function Dashboard() {
             image={student}
             cardClass="student-card"
           />
-
         </section>
-
       </main>
     </div>
   );
