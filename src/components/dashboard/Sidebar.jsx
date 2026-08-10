@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import "../../styles/sidebar.css";
 
 import logo from "../../assets/campusnest-logo.png";
@@ -14,9 +15,16 @@ import {
   MdKeyboardArrowDown,
 } from "react-icons/md";
 
-function Sidebar() {
+function Sidebar({ isOpen = true }) {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("access_token");
+    navigate("/");
+  };
+
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar ${isOpen ? "" : "collapsed"}`}>
 
       <div className="sidebar-logo">
         <img src={logo} alt="CampusNest" />
@@ -68,7 +76,7 @@ function Sidebar() {
 
       </div>
 
-      <div className="logout">
+      <div className="logout" onClick={handleLogout}>
         <MdLogout />
         <span>Logout</span>
       </div>
