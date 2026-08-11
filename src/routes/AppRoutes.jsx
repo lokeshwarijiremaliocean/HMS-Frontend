@@ -6,7 +6,6 @@ import Register from "../pages/Register";
 import Dashboard from "../pages/Dashboard";
 import Hostel from "../pages/Hostel";
 import Room from "../pages/Room";
-import AdminProfile from "../pages/AdminProfile";
 
 function AppRoutes() {
   return (
@@ -17,7 +16,6 @@ function AppRoutes() {
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/hostel" element={<Hostel />} />
       <Route path="/room" element={<Room />} />
-      <Route path="/profile" element={<AdminProfile />} />
     </Routes>
   );
 }

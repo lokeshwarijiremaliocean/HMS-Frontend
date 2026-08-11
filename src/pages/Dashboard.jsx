@@ -32,7 +32,13 @@ const SEARCH_CATEGORIES = [
     subtitle: "View Student",
     icon: <MdPeople />,
     route: null,
-    keywords: ["student", "students", "view student", "add student", "stu"],
+    keywords: [
+      "student",
+      "students",
+      "view student",
+      "add student",
+      "stu",
+    ],
   },
   {
     id: "rooms",
@@ -46,7 +52,7 @@ const SEARCH_CATEGORIES = [
     id: "hostel",
     title: "Hostel",
     subtitle: "Hostel Management",
-    icon: <MdHome />,
+    icon: <MdHotel />,
     route: "/hostel",
     keywords: ["hostel", "hostels", "host"],
   },
@@ -77,16 +83,24 @@ function Dashboard() {
   const searchRef = useRef(null);
   const navigate = useNavigate();
 
+  // Fetch dashboard data
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
         const studentResponse = await apiClient.get("/student");
 
-        if (studentResponse.data && studentResponse.data.success && Array.isArray(studentResponse.data.data)) {
+        if (
+          studentResponse.data &&
+          studentResponse.data.success &&
+          Array.isArray(studentResponse.data.data)
+        ) {
           setTotalStudents(studentResponse.data.data.length);
         }
       } catch (error) {
-        console.warn("Could not fetch dashboard students list:", error.response?.data?.detail || error.message);
+        console.warn(
+          "Could not fetch dashboard students list:",
+          error.response?.data?.detail || error.message
+        );
       }
     };
 
@@ -96,7 +110,10 @@ function Dashboard() {
   // Handle click outside and Escape key for search dropdown
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (searchRef.current && !searchRef.current.contains(event.target)) {
+      if (
+        searchRef.current &&
+        !searchRef.current.contains(event.target)
+      ) {
         setIsSearchOpen(false);
       }
     };
@@ -109,6 +126,7 @@ function Dashboard() {
 
     document.addEventListener("mousedown", handleClickOutside);
     document.addEventListener("keydown", handleKeyDown);
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keydown", handleKeyDown);
@@ -116,6 +134,7 @@ function Dashboard() {
   }, []);
 
   const query = searchTerm.trim().toLowerCase();
+
   const searchResults =
     query === ""
       ? []
@@ -140,17 +159,31 @@ function Dashboard() {
   };
 
   return (
-    <div className="dashboard-container">
+    <div
+      className={`dashboard-container ${sidebarOpen ? "" : "sidebar-collapsed"
+        }`}
+    >
       {/* Sidebar */}
-      <Sidebar isOpen={sidebarOpen} />
+      <Sidebar
+        activePage="dashboard"
+        isOpen={sidebarOpen}
+        onToggle={() => setSidebarOpen((prev) => !prev)}
+      />
 
       <main className="dashboard-main">
         {/* Navbar */}
-        <Navbar onToggleSidebar={() => setSidebarOpen((prev) => !prev)} />
+        <Navbar
+          onToggleSidebar={() =>
+            setSidebarOpen((prev) => !prev)
+          }
+        />
 
         {/* Search Bar */}
         <div className="dashboard-search-container">
-          <div className="dashboard-search-wrapper" ref={searchRef}>
+          <div
+            className="dashboard-search-wrapper"
+            ref={searchRef}
+          >
             <div className="dashboard-search-bar">
               <MdSearch className="search-icon" />
 
@@ -169,20 +202,28 @@ function Dashboard() {
             {/* Search Dropdown */}
             {searchTerm.trim() !== "" && isSearchOpen && (
               <div className="search-results-dropdown">
-                <div className="search-results-header">Search results</div>
+                <div className="search-results-header">
+                  Search results
+                </div>
 
                 {searchResults.length > 0 ? (
                   searchResults.map((result) => (
                     <div
                       key={result.id}
                       className="search-result-item"
-                      onClick={() => handleSelectResult(result)}
+                      onClick={() =>
+                        handleSelectResult(result)
+                      }
                     >
-                      <div className="search-result-icon">{result.icon}</div>
+                      <div className="search-result-icon">
+                        {result.icon}
+                      </div>
+
                       <div className="search-result-info">
                         <span className="search-result-title">
                           {result.title}
                         </span>
+
                         <span className="search-result-subtitle">
                           {result.subtitle}
                         </span>
@@ -190,7 +231,9 @@ function Dashboard() {
                     </div>
                   ))
                 ) : (
-                  <div className="no-results-found">No results found</div>
+                  <div className="no-results-found">
+                    No results found
+                  </div>
                 )}
               </div>
             )}

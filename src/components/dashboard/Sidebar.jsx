@@ -1,27 +1,34 @@
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "../../styles/sidebar.css";
 
 import logo from "../../assets/campusnest-logo.png";
 
 import {
   MdDashboard,
-  MdPersonAdd,
   MdGroups,
+  MdPersonAdd,
+  MdSearch,
+  MdEdit,
+  MdDelete,
   MdMeetingRoom,
   MdPersonPin,
   MdBed,
   MdApartment,
+  MdLayers,
+  MdAssessment,
   MdLogout,
   MdKeyboardArrowDown,
 } from "react-icons/md";
 
-function Sidebar({ isOpen = true }) {
+function Sidebar({ activePage = "dashboard", activeStudentTab = "all", onSelectStudentTab }) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleLogout = () => {
-    localStorage.removeItem("access_token");
-    navigate("/");
+  const handleStudentTabClick = (tab) => {
+    if (onSelectStudentTab) {
+      onSelectStudentTab(tab);
+    }
+    navigate("/student-management", { state: { tab } });
   };
 
   return (
@@ -33,24 +40,51 @@ function Sidebar({ isOpen = true }) {
 
       <div className="sidebar-menu">
 
-        <div 
-          className={`menu-item ${location.pathname === "/dashboard" ? "active" : ""}`}
-          onClick={() => navigate("/dashboard")}
-        >
+        <div className="menu-item active">
           <MdDashboard />
           <span>Dashboard</span>
         </div>
 
         <h4>STUDENT MANAGEMENT</h4>
 
-        <div className="menu-item">
+        <div
+          className={`menu-item ${activePage === "studentManagement" && activeStudentTab === "all" ? "active" : ""}`}
+          onClick={() => handleStudentTabClick("all")}
+        >
+          <MdGroups />
+          <span>All Students</span>
+        </div>
+
+        <div
+          className={`menu-item ${activePage === "studentManagement" && activeStudentTab === "add" ? "active" : ""}`}
+          onClick={() => handleStudentTabClick("add")}
+        >
           <MdPersonAdd />
           <span>Add Student</span>
         </div>
 
-        <div className="menu-item">
-          <MdGroups />
-          <span>View Student</span>
+        <div
+          className={`menu-item ${activePage === "studentManagement" && activeStudentTab === "search" ? "active" : ""}`}
+          onClick={() => handleStudentTabClick("search")}
+        >
+          <MdSearch />
+          <span>Search Student</span>
+        </div>
+
+        <div
+          className={`menu-item ${activePage === "studentManagement" && activeStudentTab === "update" ? "active" : ""}`}
+          onClick={() => handleStudentTabClick("update")}
+        >
+          <MdEdit />
+          <span>Update Student</span>
+        </div>
+
+        <div
+          className={`menu-item ${activePage === "studentManagement" && activeStudentTab === "delete" ? "active" : ""}`}
+          onClick={() => handleStudentTabClick("delete")}
+        >
+          <MdDelete />
+          <span>Delete Student</span>
         </div>
 
         <h4>
@@ -76,6 +110,41 @@ function Sidebar({ isOpen = true }) {
         <div className="menu-item">
           <MdApartment />
           <span>Floor Search</span>
+        </div>
+
+        <h4>
+          FLOOR MANAGEMENT
+          <MdKeyboardArrowDown className="arrow" />
+        </h4>
+
+        <div className="menu-item">
+          <MdLayers />
+          <span>View Floors</span>
+        </div>
+
+        <h4>
+          ALLOCATION
+          <MdKeyboardArrowDown className="arrow" />
+        </h4>
+
+        <div className="menu-item">
+          <MdPersonPin />
+          <span>Allocate Students</span>
+        </div>
+
+        <div className="menu-item">
+          <MdBed />
+          <span>Allocate Bed</span>
+        </div>
+
+        <h4>
+          REPORTS
+          <MdKeyboardArrowDown className="arrow" />
+        </h4>
+
+        <div className="menu-item">
+          <MdAssessment />
+          <span>Reports</span>
         </div>
 
       </div>
