@@ -10,7 +10,7 @@ import {
 } from "react-icons/md";
 
 import Sidebar from "../dashboard/Sidebar";
-import admin from "../../assets/admin.png";
+import Navbar from "../dashboard/Navbar";
 
 import RoomTabs from "./RoomTabs";
 import AllRooms from "./AllRooms";
@@ -25,6 +25,7 @@ import "../../styles/roomManagement.css";
 function RoomManagement() {
   const [activeRoomTab, setActiveRoomTab] = useState("all");
   const [selectedRoomId, setSelectedRoomId] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // Initial Rooms Data
   const initialRooms = [
@@ -128,38 +129,15 @@ function RoomManagement() {
   return (
     <div className="room-container">
       {/* 1. FIXED SIDEBAR */}
-      <Sidebar />
+      <Sidebar isOpen={sidebarOpen} />
 
       {/* MAIN LAYOUT */}
       <main className="room-main">
-        {/* 2. FIXED HEADER */}
-        <header className="room-navbar">
-          <div className="room-navbar-left">
-            <MdMenu className="rm-menu-icon" />
-            <div className="rm-title-group">
-              <h1>Room Management</h1>
-              <p className="rm-breadcrumb">
-                Dashboard <span>&gt;</span> Rooms
-              </p>
-            </div>
-          </div>
-
-          <div className="room-navbar-right">
-            <div className="rm-notification">
-              <MdNotifications />
-              <span className="rm-badge">3</span>
-            </div>
-
-            <img src={admin} alt="Admin" className="rm-admin-image" />
-
-            <div className="rm-admin-info">
-              <h4>Admin</h4>
-              <p>Hostel Administrator</p>
-            </div>
-
-            <MdKeyboardArrowDown className="rm-dropdown-icon" />
-          </div>
-        </header>
+        {/* Shared Navbar with 👤 Admin Profile and 🔔 Notification Bell */}
+        <Navbar
+          title="Room Management"
+          onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
+        />
 
         {/* 3. FIXED STATISTICS OVERVIEW CARDS (Always visible) */}
         <section className="rm-stats-grid">

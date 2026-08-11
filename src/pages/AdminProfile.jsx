@@ -14,17 +14,7 @@ import {
   MdPhone,
   MdShield,
   MdCalendarToday,
-  MdLock,
-  MdSecurity,
-  MdNotificationsActive,
-  MdPalette,
-  MdHistory,
-  MdFlashOn,
   MdClose,
-  MdKey,
-  MdDownload,
-  MdStorage,
-  MdRefresh,
   MdHome,
   MdWc,
   MdCheckCircle,
@@ -55,7 +45,20 @@ const formatDate = (isoString) => {
 
 function AdminProfile() {
   const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  // Sidebar preference state (restored from localStorage)
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    const saved = localStorage.getItem("hms_sidebar_open");
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+
+  const handleToggleSidebar = () => {
+    setSidebarOpen((prev) => {
+      const nextState = !prev;
+      localStorage.setItem("hms_sidebar_open", JSON.stringify(nextState));
+      return nextState;
+    });
+  };
 
   // API Loading & Error State
   const [loading, setLoading] = useState(true);
@@ -79,22 +82,6 @@ function AdminProfile() {
   // Interactivity States
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editFormData, setEditFormData] = useState({ ...profile });
-
-  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
-  const [passwordFormData, setPasswordFormData] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-  });
-
-  const [is2FAEnabled, setIs2FAEnabled] = useState(true);
-  const [notifications, setNotifications] = useState({
-    emailAlerts: true,
-    smsAlerts: false,
-    systemAlerts: true,
-  });
-
-  const [activeTheme, setActiveTheme] = useState("Dark Red (HMS Default)");
   const [toastMessage, setToastMessage] = useState(null);
 
   const fetchAdminProfile = async () => {
@@ -109,7 +96,6 @@ function AdminProfile() {
       return;
     }
 
-    // Retrieve phone number from localStorage or fallback to admin phone "9782367223"
     const adminPhone =
       localStorage.getItem("admin_phone") ||
       localStorage.getItem("phone") ||
@@ -120,8 +106,6 @@ function AdminProfile() {
         params: { phone: adminPhone },
       });
       const resData = response.data;
-      
-      // Extract admin object from response.data.data
       const adminData = resData?.data || resData;
 
       if (adminData && (adminData.first_name || adminData.email || adminData.id)) {
@@ -206,49 +190,16 @@ function AdminProfile() {
     showToast("Profile details updated locally!", "success");
   };
 
-  // Change Password Handlers
-  const handleSavePassword = (e) => {
-    e.preventDefault();
-    if (passwordFormData.newPassword !== passwordFormData.confirmPassword) {
-      showToast("New passwords do not match!", "info");
-      return;
-    }
-    setIsPasswordModalOpen(false);
-    setPasswordFormData({ currentPassword: "", newPassword: "", confirmPassword: "" });
-    showToast("Password changed successfully!", "success");
-  };
-
-  // Toggle handlers
-  const handle2FAToggle = () => {
-    const newState = !is2FAEnabled;
-    setIs2FAEnabled(newState);
-    showToast(`Two-Factor Authentication ${newState ? "Enabled" : "Disabled"}.`, "info");
-  };
-
-  const handleNotificationToggle = (key) => {
-    setNotifications((prev) => ({ ...prev, [key]: !prev[key] }));
-    showToast("Notification preferences updated.", "success");
-  };
-
-  const handleThemeChange = (themeName) => {
-    setActiveTheme(themeName);
-    showToast(`Theme updated to ${themeName}.`, "info");
-  };
-
-  const handleQuickAction = (actionName) => {
-    showToast(`${actionName} triggered successfully.`, "success");
-  };
-
   return (
     <div className="profile-container">
       {/* Existing HMS Sidebar */}
       <Sidebar isOpen={sidebarOpen} />
 
       <main className="profile-main">
-        {/* Existing Navbar with page title */}
+        {/* Existing Shared Navbar */}
         <Navbar
-          onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
-          title="Admin Profile / Settings"
+          onToggleSidebar={handleToggleSidebar}
+          title="Admin Profile"
         />
 
         {/* Breadcrumb Navigation */}
@@ -299,7 +250,7 @@ function AdminProfile() {
             </button>
           </div>
         ) : (
-          /* Main Admin Profile Area */
+          /* Main Admin Profile Area Only */
           <div className="profile-top-card">
             <div className="profile-header-banner">
               <div className="profile-avatar-group">
@@ -406,208 +357,6 @@ function AdminProfile() {
           </div>
         )}
 
-        {/* Settings & Security Section */}
-        <div className="section-heading">
-          <div>
-            <h3>
-              <MdSecurity />
-              Settings & Security
-            </h3>
-            <p className="section-subtitle">
-              Manage credentials, authentication, notifications, and preference settings.
-            </p>
-          </div>
-        </div>
-
-        <div className="settings-grid">
-          {/* 1. Change Password */}
-          <div className="settings-card">
-            <div className="settings-card-header">
-              <div className="settings-card-icon lock">
-                <MdLock />
-              </div>
-              <div className="settings-card-title-group">
-                <h4>Change Password</h4>
-                <p>Ensure account security by periodically updating your password.</p>
-              </div>
-            </div>
-            <div className="settings-card-body">
-              <button
-                className="settings-action-btn"
-                onClick={() => setIsPasswordModalOpen(true)}
-              >
-                <MdKey /> Update Password
-              </button>
-            </div>
-          </div>
-
-          {/* 2. Two Factor Authentication */}
-          <div className="settings-card">
-            <div className="settings-card-header">
-              <div className="settings-card-icon security">
-                <MdSecurity />
-              </div>
-              <div className="settings-card-title-group">
-                <h4>Two Factor Authentication</h4>
-                <p>Protect account access with 2FA verification steps.</p>
-              </div>
-            </div>
-            <div className="settings-card-body">
-              <div className="switch-toggle-row">
-                <span className="switch-label">
-                  Status: {is2FAEnabled ? "Enabled" : "Disabled"}
-                </span>
-                <label className="switch">
-                  <input
-                    type="checkbox"
-                    checked={is2FAEnabled}
-                    onChange={handle2FAToggle}
-                  />
-                  <span className="slider"></span>
-                </label>
-              </div>
-            </div>
-          </div>
-
-          {/* 3. Notification Preferences */}
-          <div className="settings-card">
-            <div className="settings-card-header">
-              <div className="settings-card-icon notification">
-                <MdNotificationsActive />
-              </div>
-              <div className="settings-card-title-group">
-                <h4>Notification Preferences</h4>
-                <p>Configure automated system alerts and operational updates.</p>
-              </div>
-            </div>
-            <div className="settings-card-body" style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              <div className="switch-toggle-row">
-                <span className="switch-label">Email Alerts</span>
-                <label className="switch">
-                  <input
-                    type="checkbox"
-                    checked={notifications.emailAlerts}
-                    onChange={() => handleNotificationToggle("emailAlerts")}
-                  />
-                  <span className="slider"></span>
-                </label>
-              </div>
-              <div className="switch-toggle-row">
-                <span className="switch-label">SMS Notifications</span>
-                <label className="switch">
-                  <input
-                    type="checkbox"
-                    checked={notifications.smsAlerts}
-                    onChange={() => handleNotificationToggle("smsAlerts")}
-                  />
-                  <span className="slider"></span>
-                </label>
-              </div>
-            </div>
-          </div>
-
-          {/* 4. Theme Settings */}
-          <div className="settings-card">
-            <div className="settings-card-header">
-              <div className="settings-card-icon theme">
-                <MdPalette />
-              </div>
-              <div className="settings-card-title-group">
-                <h4>Theme Settings</h4>
-                <p>Choose visual styling preferences for your HMS session.</p>
-              </div>
-            </div>
-            <div className="settings-card-body">
-              <div className="theme-pill-group">
-                <span
-                  className={`theme-pill ${
-                    activeTheme === "Dark Red (HMS Default)" ? "active" : ""
-                  }`}
-                  onClick={() => handleThemeChange("Dark Red (HMS Default)")}
-                >
-                  Dark Red (Default)
-                </span>
-                <span
-                  className={`theme-pill ${
-                    activeTheme === "Light Slate" ? "active" : ""
-                  }`}
-                  onClick={() => handleThemeChange("Light Slate")}
-                >
-                  Light Slate
-                </span>
-                <span
-                  className={`theme-pill ${
-                    activeTheme === "Modern Dark" ? "active" : ""
-                  }`}
-                  onClick={() => handleThemeChange("Modern Dark")}
-                >
-                  Modern Dark
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* 5. Account Activity */}
-          <div className="settings-card">
-            <div className="settings-card-header">
-              <div className="settings-card-icon activity">
-                <MdHistory />
-              </div>
-              <div className="settings-card-title-group">
-                <h4>Account Activity</h4>
-                <p>Log of recent administrative sessions and events.</p>
-              </div>
-            </div>
-            <div className="settings-card-body">
-              <div className="activity-mini-list">
-                <div className="activity-item">
-                  <span className="activity-desc">Logged in via Chrome (Windows)</span>
-                  <span className="activity-time">Active Now</span>
-                </div>
-                <div className="activity-item">
-                  <span className="activity-desc">Room Allocations Modified</span>
-                  <span className="activity-time">Yesterday, 4:30 PM</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* 6. Quick Actions */}
-          <div className="settings-card">
-            <div className="settings-card-header">
-              <div className="settings-card-icon quick">
-                <MdFlashOn />
-              </div>
-              <div className="settings-card-title-group">
-                <h4>Quick Actions</h4>
-                <p>Shortcuts for system maintenance and report downloads.</p>
-              </div>
-            </div>
-            <div className="settings-card-body">
-              <div className="quick-btn-group">
-                <button
-                  className="quick-btn"
-                  onClick={() => handleQuickAction("System Logs Export")}
-                >
-                  <MdDownload /> Export Logs
-                </button>
-                <button
-                  className="quick-btn"
-                  onClick={() => handleQuickAction("Database Backup")}
-                >
-                  <MdStorage /> Backup DB
-                </button>
-                <button
-                  className="quick-btn"
-                  onClick={() => handleQuickAction("Cache Refresh")}
-                >
-                  <MdRefresh /> Clear Cache
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Edit Profile Modal */}
         {isEditModalOpen && (
           <div className="modal-backdrop" onClick={() => setIsEditModalOpen(false)}>
@@ -673,90 +422,6 @@ function AdminProfile() {
                   </button>
                   <button type="submit" className="modal-save-btn">
                     Save Changes
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* Change Password Modal */}
-        {isPasswordModalOpen && (
-          <div className="modal-backdrop" onClick={() => setIsPasswordModalOpen(false)}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-              <div className="modal-header">
-                <h3>
-                  <MdLock /> Change Password
-                </h3>
-                <button
-                  className="modal-close-btn"
-                  onClick={() => setIsPasswordModalOpen(false)}
-                >
-                  <MdClose />
-                </button>
-              </div>
-
-              <form onSubmit={handleSavePassword}>
-                <div className="modal-body">
-                  <div className="modal-form-group">
-                    <label>Current Password</label>
-                    <input
-                      type="password"
-                      placeholder="Enter current password"
-                      value={passwordFormData.currentPassword}
-                      onChange={(e) =>
-                        setPasswordFormData({
-                          ...passwordFormData,
-                          currentPassword: e.target.value,
-                        })
-                      }
-                      required
-                    />
-                  </div>
-
-                  <div className="modal-form-group">
-                    <label>New Password</label>
-                    <input
-                      type="password"
-                      placeholder="Enter new password"
-                      value={passwordFormData.newPassword}
-                      onChange={(e) =>
-                        setPasswordFormData({
-                          ...passwordFormData,
-                          newPassword: e.target.value,
-                        })
-                      }
-                      required
-                    />
-                  </div>
-
-                  <div className="modal-form-group">
-                    <label>Confirm New Password</label>
-                    <input
-                      type="password"
-                      placeholder="Confirm new password"
-                      value={passwordFormData.confirmPassword}
-                      onChange={(e) =>
-                        setPasswordFormData({
-                          ...passwordFormData,
-                          confirmPassword: e.target.value,
-                        })
-                      }
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="modal-footer">
-                  <button
-                    type="button"
-                    className="modal-cancel-btn"
-                    onClick={() => setIsPasswordModalOpen(false)}
-                  >
-                    Cancel
-                  </button>
-                  <button type="submit" className="modal-save-btn">
-                    Update Password
                   </button>
                 </div>
               </form>
