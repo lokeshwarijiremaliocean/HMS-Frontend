@@ -1,4 +1,3 @@
-```jsx
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import apiClient from "../api/axiosInstance";
@@ -33,7 +32,13 @@ const SEARCH_CATEGORIES = [
     subtitle: "View Student",
     icon: <MdPeople />,
     route: null,
-    keywords: ["student", "students", "view student", "add student", "stu"],
+    keywords: [
+      "student",
+      "students",
+      "view student",
+      "add student",
+      "stu",
+    ],
   },
   {
     id: "rooms",
@@ -47,7 +52,7 @@ const SEARCH_CATEGORIES = [
     id: "hostel",
     title: "Hostel",
     subtitle: "Hostel Management",
-    icon: <MdHome />,
+    icon: <MdHotel />,
     route: "/hostel",
     keywords: ["hostel", "hostels", "host"],
   },
@@ -78,6 +83,7 @@ function Dashboard() {
   const searchRef = useRef(null);
   const navigate = useNavigate();
 
+  // Fetch dashboard data
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
@@ -133,18 +139,11 @@ function Dashboard() {
     query === ""
       ? []
       : SEARCH_CATEGORIES.filter((item) => {
-          const titleMatch = item.title
-            .toLowerCase()
-            .includes(query);
-
-          const subtitleMatch = item.subtitle
-            .toLowerCase()
-            .includes(query);
-
+          const titleMatch = item.title.toLowerCase().includes(query);
+          const subtitleMatch = item.subtitle.toLowerCase().includes(query);
           const keywordMatch = item.keywords.some((kw) =>
             kw.toLowerCase().includes(query)
           );
-
           return titleMatch || subtitleMatch || keywordMatch;
         });
 
@@ -160,11 +159,15 @@ function Dashboard() {
   };
 
   return (
-    <div className="dashboard-container">
+    <div
+      className={`dashboard-container ${sidebarOpen ? "" : "sidebar-collapsed"
+        }`}
+    >
       {/* Sidebar */}
       <Sidebar
         activePage="dashboard"
         isOpen={sidebarOpen}
+        onToggle={() => setSidebarOpen((prev) => !prev)}
       />
 
       <main className="dashboard-main">
@@ -333,4 +336,3 @@ function Dashboard() {
 }
 
 export default Dashboard;
-```
