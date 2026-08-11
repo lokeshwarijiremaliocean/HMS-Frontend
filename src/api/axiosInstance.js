@@ -12,7 +12,7 @@ const apiClient = axios.create({
 // Request interceptor to automatically attach JWT access_token from localStorage.
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("access_token");
+    let token = localStorage.getItem("access_token") || localStorage.getItem("token");
     if (token) {
       // Remove any wrapping quotes if stored as stringified JSON
       token = token.replace(/^"(.*)"$/, "$1");

@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "../../styles/sidebar.css";
 
 import logo from "../../assets/campusnest-logo.png";
@@ -20,7 +20,7 @@ import {
   MdKeyboardArrowDown,
 } from "react-icons/md";
 
-function Sidebar({ activePage = "dashboard", activeStudentTab = "all", onSelectStudentTab }) {
+function Sidebar({ isOpen = true, activePage = "dashboard", activeStudentTab = "all", onSelectStudentTab }) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -29,6 +29,11 @@ function Sidebar({ activePage = "dashboard", activeStudentTab = "all", onSelectS
       onSelectStudentTab(tab);
     }
     navigate("/student-management", { state: { tab } });
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("access_token");
+    navigate("/");
   };
 
   return (
@@ -40,7 +45,7 @@ function Sidebar({ activePage = "dashboard", activeStudentTab = "all", onSelectS
 
       <div className="sidebar-menu">
 
-        <div className="menu-item active">
+        <div className={`menu-item ${location.pathname === "/dashboard" ? "active" : ""}`} onClick={() => navigate("/dashboard")}>
           <MdDashboard />
           <span>Dashboard</span>
         </div>
