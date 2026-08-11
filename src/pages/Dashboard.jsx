@@ -189,7 +189,7 @@ function Dashboard() {
 
               <input
                 type="text"
-                placeholder="Search students, rooms, hostels..."
+                placeholder="Search student, rooms, hostels..."
                 value={searchTerm}
                 onChange={(e) => {
                   setSearchTerm(e.target.value);

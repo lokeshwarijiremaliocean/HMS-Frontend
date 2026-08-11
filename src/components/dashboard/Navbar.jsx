@@ -72,7 +72,7 @@ function Navbar({ onToggleSidebar, unreadNotifications = false, notifications = 
 
   const handleSettingsClick = () => {
     setIsAdminOpen(false);
-    navigate("/profile");
+    navigate("/settings");
   };
 
   return (

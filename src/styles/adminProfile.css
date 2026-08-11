@@ -17,6 +17,56 @@
 }
 
 /* ======================================
+   DYNAMIC THEME OVERRIDES
+====================================== */
+
+body.theme-dark {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+}
+
+body.theme-dark .profile-container,
+body.theme-dark .dashboard-container,
+body.theme-dark .hostel-management-container {
+  background: #0f172a !important;
+}
+
+body.theme-dark .profile-top-card,
+body.theme-dark .settings-card,
+body.theme-dark .modal-content,
+body.theme-dark .navbar,
+body.theme-dark .info-item-card {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+body.theme-dark .profile-title-details h2,
+body.theme-dark .info-content .info-value,
+body.theme-dark .settings-card-title-group h4,
+body.theme-dark .switch-label,
+body.theme-dark .navbar-left h1 {
+  color: #f8fafc !important;
+}
+
+body.theme-dark .info-content .info-label,
+body.theme-dark .settings-card-title-group p,
+body.theme-dark .section-subtitle,
+body.theme-dark .breadcrumb-list {
+  color: #94a3b8 !important;
+}
+
+body.theme-light {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+body.theme-light .profile-container,
+body.theme-light .dashboard-container {
+  background: #f1f5f9 !important;
+}
+
+/* ======================================
    LOADING & ERROR STATES
 ====================================== */
 

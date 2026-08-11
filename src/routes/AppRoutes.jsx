@@ -7,6 +7,7 @@ import Dashboard from "../pages/Dashboard";
 import Hostel from "../pages/Hostel";
 import Room from "../pages/Room";
 import AdminProfile from "../pages/AdminProfile";
+import Settings from "../pages/Settings";
 
 function AppRoutes() {
   return (
@@ -18,6 +19,7 @@ function AppRoutes() {
       <Route path="/hostel" element={<Hostel />} />
       <Route path="/room" element={<Room />} />
       <Route path="/profile" element={<AdminProfile />} />
+      <Route path="/settings" element={<Settings />} />
     </Routes>
   );
 }
