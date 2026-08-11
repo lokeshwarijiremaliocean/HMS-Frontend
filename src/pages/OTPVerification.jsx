@@ -13,6 +13,7 @@ function OTPVerification() {
   const email = location.state?.email;
 
   const [otp, setOtp] = useState(["", "", "", ""]);
+  const [verifying, setVerifying] = useState(false);
 
   const handleChange = (value, index) => {
     if (!/^[0-9]?$/.test(value)) {
@@ -40,15 +41,22 @@ function OTPVerification() {
       return;
     }
 
+    if (verifying) return;
+    setVerifying(true);
+
     try {
       const response = await verifyOTP(email, finalOTP);
 
       if (response.data.success) {
-        if (response.data.data?.access_token) {
-          localStorage.setItem(
-            "access_token",
-            response.data.data.access_token
-          );
+        const token =
+          response.data.data?.access_token ||
+          response.data.data?.token ||
+          response.data.access_token ||
+          response.data.token;
+
+        if (token) {
+          localStorage.setItem("access_token", token);
+          localStorage.setItem("token", token);
         }
 
         alert("OTP Verified Successfully");
@@ -59,6 +67,8 @@ function OTPVerification() {
     } catch (error) {
       console.log(error);
       alert("Something went wrong. Please try again.");
+    } finally {
+      setVerifying(false);
     }
   };
 

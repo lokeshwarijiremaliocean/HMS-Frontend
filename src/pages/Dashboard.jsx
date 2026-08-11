@@ -57,7 +57,7 @@ function Dashboard() {
     <div className="dashboard-container">
 
       {/* Sidebar */}
-      <Sidebar />
+      <Sidebar activePage="dashboard" />
 
       <main className="dashboard-main">
 

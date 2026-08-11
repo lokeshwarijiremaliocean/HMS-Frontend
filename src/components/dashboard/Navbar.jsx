@@ -4,7 +4,7 @@ import admin from "../../assets/admin.png";
 
 import { MdMenu, MdNotifications, MdKeyboardArrowDown } from "react-icons/md";
 
-function Navbar() {
+function Navbar({ title = "Dashboard", breadcrumb }) {
   return (
     <div className="navbar">
 
@@ -12,7 +12,12 @@ function Navbar() {
 
         <MdMenu className="menu-icon" />
 
-        <h1>Dashboard</h1>
+        <div>
+          <h1>{title}</h1>
+          {breadcrumb && (
+            <p className="navbar-breadcrumb">{breadcrumb}</p>
+          )}
+        </div>
 
       </div>
 

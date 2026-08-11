@@ -146,3 +146,12 @@ cursor:pointer;
 color:#333;
 
 }
+
+/* Breadcrumb */
+
+.navbar-breadcrumb{
+font-size:13px;
+color:#888;
+margin-top:2px;
+font-weight:400;
+}

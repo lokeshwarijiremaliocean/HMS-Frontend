@@ -7,23 +7,23 @@ import LeftPanel from "../components/auth/LeftPanel";
 import InputField from "../components/auth/InputField";
 import Button from "../components/auth/Button";
 
-import { sendOTP } from "../api/authApi";
+import { sendOTP } from "../api/authapi";
 
 function EmailVerification() {
-
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
+  const [sending, setSending] = useState(false);
 
   const handleContinue = async () => {
-
     if (!email) {
       alert("Please enter your email.");
       return;
     }
+    if (sending) return;
 
+    setSending(true);
     try {
-
       const response = await sendOTP(email);
 
       console.log("OTP Response:", response.data);
@@ -35,15 +35,13 @@ function EmailVerification() {
           email: email,
         },
       });
-
     } catch (error) {
-
       console.error("OTP Error:", error);
 
       alert("Failed to send OTP");
-
+    } finally {
+      setSending(false);
     }
-
   };
 
 

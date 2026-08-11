@@ -5,6 +5,7 @@ import OTPVerification from "../pages/OTPVerification";
 import Register from "../pages/Register";
 import Dashboard from "../pages/Dashboard";
 import Hostel from "../pages/Hostel";
+import StudentManagement from "../pages/StudentManagement";
 
 function AppRoutes() {
   return (
@@ -14,6 +15,8 @@ function AppRoutes() {
       <Route path="/register" element={<Register />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/hostel" element={<Hostel />} />
+      <Route path="/student-management" element={<StudentManagement />} />
+      <Route path="/students" element={<StudentManagement />} />
     </Routes>
   );
 }
