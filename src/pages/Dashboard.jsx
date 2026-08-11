@@ -139,7 +139,6 @@ function Dashboard() {
     }
   };
 
->>>>>>> 6bb1a0240ac788a20c085e45892ba36e0e2dcecf
   return (
     <div className="dashboard-container">
       {/* Sidebar */}

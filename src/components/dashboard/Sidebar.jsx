@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "../../styles/sidebar.css";
 
 import logo from "../../assets/campusnest-logo.png";
@@ -17,6 +17,7 @@ import {
 
 function Sidebar({ isOpen = true }) {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     localStorage.removeItem("access_token");
@@ -27,12 +28,15 @@ function Sidebar({ isOpen = true }) {
     <aside className={`sidebar ${isOpen ? "" : "collapsed"}`}>
 
       <div className="sidebar-logo">
-        <img src={logo} alt="CampusNest" />
+        <img src={logo} alt="CampusNest" style={{ cursor: "pointer" }} onClick={() => navigate("/dashboard")} />
       </div>
 
       <div className="sidebar-menu">
 
-        <div className="menu-item active">
+        <div 
+          className={`menu-item ${location.pathname === "/dashboard" ? "active" : ""}`}
+          onClick={() => navigate("/dashboard")}
+        >
           <MdDashboard />
           <span>Dashboard</span>
         </div>
