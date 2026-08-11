@@ -32,7 +32,7 @@ function Sidebar({ activePage = "dashboard", activeStudentTab = "all", onSelectS
   };
 
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar ${isOpen ? "" : "collapsed"}`}>
 
       <div className="sidebar-logo">
         <img src={logo} alt="CampusNest" />
@@ -152,7 +152,7 @@ function Sidebar({ activePage = "dashboard", activeStudentTab = "all", onSelectS
 
       </div>
 
-      <div className="logout">
+      <div className="logout" onClick={handleLogout}>
         <MdLogout />
         <span>Logout</span>
       </div>

@@ -58,7 +58,6 @@ function OTPVerification() {
           localStorage.setItem("access_token", token);
           localStorage.setItem("token", token);
         }
-
         alert("OTP Verified Successfully");
         navigate("/register");
       } else {

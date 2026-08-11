@@ -1,6 +1,6 @@
 import hostelBg from "../../assets/hostel-bg.png";
 
-function HeroSection() {
+function HeroSection({ onExplore }) {
   return (
     <section
       className="hostel-hero"
@@ -22,7 +22,7 @@ function HeroSection() {
         </p>
 
         <div className="hero-buttons">
-          <button className="btn-primary">
+          <button className="btn-primary" onClick={onExplore}>
             Explore Hostel
           </button>
 
