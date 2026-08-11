@@ -1,3 +1,4 @@
+```jsx
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/navbar.css";
@@ -13,7 +14,13 @@ import {
   MdLogout,
 } from "react-icons/md";
 
-function Navbar({ onToggleSidebar, unreadNotifications = false, notifications = [] }) {
+function Navbar({
+  title = "Dashboard",
+  breadcrumb,
+  onToggleSidebar,
+  unreadNotifications = false,
+  notifications = [],
+}) {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [hasUnreadNotifications, setHasUnreadNotifications] = useState(
@@ -24,7 +31,9 @@ function Navbar({ onToggleSidebar, unreadNotifications = false, notifications = 
   const navigate = useNavigate();
 
   useEffect(() => {
-    setHasUnreadNotifications(unreadNotifications || notifications.length > 0);
+    setHasUnreadNotifications(
+      unreadNotifications || notifications.length > 0
+    );
   }, [unreadNotifications, notifications]);
 
   useEffect(() => {
@@ -34,16 +43,22 @@ function Navbar({ onToggleSidebar, unreadNotifications = false, notifications = 
         setIsAdminOpen(false);
       }
     };
+
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   const toggleNotification = () => {
     setIsAdminOpen(false);
+
     if (!isNotificationOpen) {
       // Mark notifications as read when opening panel
       setHasUnreadNotifications(false);
     }
+
     setIsNotificationOpen((prev) => !prev);
   };
 
@@ -70,39 +85,76 @@ function Navbar({ onToggleSidebar, unreadNotifications = false, notifications = 
   return (
     <div className="navbar" ref={navRef}>
       <div className="navbar-left">
-        <MdMenu className="menu-icon" onClick={onToggleSidebar} title="Toggle Sidebar" />
-        <h1>Dashboard</h1>
+        <MdMenu
+          className="menu-icon"
+          onClick={onToggleSidebar}
+          title="Toggle Sidebar"
+        />
+
+        <div>
+          <h1>{title}</h1>
+
+          {breadcrumb && (
+            <p className="navbar-breadcrumb">{breadcrumb}</p>
+          )}
+        </div>
       </div>
 
       <div className="navbar-right">
         {/* Notification Bell */}
-        <div className="notification" onClick={toggleNotification} title="Notifications">
+        <div
+          className="notification"
+          onClick={toggleNotification}
+          title="Notifications"
+        >
           <MdNotifications />
+
           {hasUnreadNotifications && <span className="badge"></span>}
         </div>
 
         {/* Notification Dropdown */}
         {isNotificationOpen && (
           <div className="notification-dropdown">
-            <div className="notification-header">Notifications</div>
+            <div className="notification-header">
+              Notifications
+            </div>
+
             {notifications && notifications.length > 0 ? (
               <ul className="notification-list">
                 {notifications.map((item, index) => (
-                  <li key={item.id || index} className="notification-item">
+                  <li
+                    key={item.id || index}
+                    className="notification-item"
+                  >
                     <span className="notification-dot"></span>
-                    <span>{typeof item === "string" ? item : item.message}</span>
+
+                    <span>
+                      {typeof item === "string"
+                        ? item
+                        : item.message}
+                    </span>
                   </li>
                 ))}
               </ul>
             ) : (
-              <div className="no-notifications">No new notifications</div>
+              <div className="no-notifications">
+                No new notifications
+              </div>
             )}
           </div>
         )}
 
         {/* Admin Profile Area */}
-        <div className="admin-profile-container" onClick={toggleAdmin} title="Admin Menu">
-          <img src={admin} alt="Admin" className="admin-image" />
+        <div
+          className="admin-profile-container"
+          onClick={toggleAdmin}
+          title="Admin Menu"
+        >
+          <img
+            src={admin}
+            alt="Admin"
+            className="admin-image"
+          />
 
           <div className="admin-info">
             <h4>Admin</h4>
@@ -115,15 +167,26 @@ function Navbar({ onToggleSidebar, unreadNotifications = false, notifications = 
         {/* Admin Dropdown */}
         {isAdminOpen && (
           <div className="admin-dropdown">
-            <div className="admin-dropdown-item" onClick={handleProfileClick}>
+            <div
+              className="admin-dropdown-item"
+              onClick={handleProfileClick}
+            >
               <MdPerson style={{ fontSize: "18px" }} />
               <span>Profile</span>
             </div>
-            <div className="admin-dropdown-item" onClick={handleSettingsClick}>
+
+            <div
+              className="admin-dropdown-item"
+              onClick={handleSettingsClick}
+            >
               <MdSettings style={{ fontSize: "18px" }} />
               <span>Settings</span>
             </div>
-            <div className="admin-dropdown-item logout-item" onClick={handleLogout}>
+
+            <div
+              className="admin-dropdown-item logout-item"
+              onClick={handleLogout}
+            >
               <MdLogout style={{ fontSize: "18px" }} />
               <span>Logout</span>
             </div>
@@ -135,3 +198,4 @@ function Navbar({ onToggleSidebar, unreadNotifications = false, notifications = 
 }
 
 export default Navbar;
+```

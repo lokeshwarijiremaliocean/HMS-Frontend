@@ -14,7 +14,7 @@ function FeatureCard({
     Floor: "/floor",
     Room: "/room",
     "Bed Info": "/bed",
-    Student: "/student",
+    Student: "/student-management",
   };
 
   return (

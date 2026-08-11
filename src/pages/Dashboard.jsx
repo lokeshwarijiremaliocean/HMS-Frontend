@@ -1,3 +1,4 @@
+```jsx
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import apiClient from "../api/axiosInstance";
@@ -82,11 +83,18 @@ function Dashboard() {
       try {
         const studentResponse = await apiClient.get("/student");
 
-        if (studentResponse.data && studentResponse.data.success && Array.isArray(studentResponse.data.data)) {
+        if (
+          studentResponse.data &&
+          studentResponse.data.success &&
+          Array.isArray(studentResponse.data.data)
+        ) {
           setTotalStudents(studentResponse.data.data.length);
         }
       } catch (error) {
-        console.warn("Could not fetch dashboard students list:", error.response?.data?.detail || error.message);
+        console.warn(
+          "Could not fetch dashboard students list:",
+          error.response?.data?.detail || error.message
+        );
       }
     };
 
@@ -96,7 +104,10 @@ function Dashboard() {
   // Handle click outside and Escape key for search dropdown
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (searchRef.current && !searchRef.current.contains(event.target)) {
+      if (
+        searchRef.current &&
+        !searchRef.current.contains(event.target)
+      ) {
         setIsSearchOpen(false);
       }
     };
@@ -109,6 +120,7 @@ function Dashboard() {
 
     document.addEventListener("mousedown", handleClickOutside);
     document.addEventListener("keydown", handleKeyDown);
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keydown", handleKeyDown);
@@ -116,15 +128,23 @@ function Dashboard() {
   }, []);
 
   const query = searchTerm.trim().toLowerCase();
+
   const searchResults =
     query === ""
       ? []
       : SEARCH_CATEGORIES.filter((item) => {
-          const titleMatch = item.title.toLowerCase().includes(query);
-          const subtitleMatch = item.subtitle.toLowerCase().includes(query);
+          const titleMatch = item.title
+            .toLowerCase()
+            .includes(query);
+
+          const subtitleMatch = item.subtitle
+            .toLowerCase()
+            .includes(query);
+
           const keywordMatch = item.keywords.some((kw) =>
             kw.toLowerCase().includes(query)
           );
+
           return titleMatch || subtitleMatch || keywordMatch;
         });
 
@@ -139,19 +159,28 @@ function Dashboard() {
     }
   };
 
->>>>>>> 6bb1a0240ac788a20c085e45892ba36e0e2dcecf
   return (
     <div className="dashboard-container">
       {/* Sidebar */}
-      <Sidebar isOpen={sidebarOpen} />
+      <Sidebar
+        activePage="dashboard"
+        isOpen={sidebarOpen}
+      />
 
       <main className="dashboard-main">
         {/* Navbar */}
-        <Navbar onToggleSidebar={() => setSidebarOpen((prev) => !prev)} />
+        <Navbar
+          onToggleSidebar={() =>
+            setSidebarOpen((prev) => !prev)
+          }
+        />
 
         {/* Search Bar */}
         <div className="dashboard-search-container">
-          <div className="dashboard-search-wrapper" ref={searchRef}>
+          <div
+            className="dashboard-search-wrapper"
+            ref={searchRef}
+          >
             <div className="dashboard-search-bar">
               <MdSearch className="search-icon" />
 
@@ -170,20 +199,28 @@ function Dashboard() {
             {/* Search Dropdown */}
             {searchTerm.trim() !== "" && isSearchOpen && (
               <div className="search-results-dropdown">
-                <div className="search-results-header">Search results</div>
+                <div className="search-results-header">
+                  Search results
+                </div>
 
                 {searchResults.length > 0 ? (
                   searchResults.map((result) => (
                     <div
                       key={result.id}
                       className="search-result-item"
-                      onClick={() => handleSelectResult(result)}
+                      onClick={() =>
+                        handleSelectResult(result)
+                      }
                     >
-                      <div className="search-result-icon">{result.icon}</div>
+                      <div className="search-result-icon">
+                        {result.icon}
+                      </div>
+
                       <div className="search-result-info">
                         <span className="search-result-title">
                           {result.title}
                         </span>
+
                         <span className="search-result-subtitle">
                           {result.subtitle}
                         </span>
@@ -191,7 +228,9 @@ function Dashboard() {
                     </div>
                   ))
                 ) : (
-                  <div className="no-results-found">No results found</div>
+                  <div className="no-results-found">
+                    No results found
+                  </div>
                 )}
               </div>
             )}
@@ -294,3 +333,4 @@ function Dashboard() {
 }
 
 export default Dashboard;
+```
