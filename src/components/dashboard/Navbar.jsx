@@ -1,4 +1,3 @@
-```jsx
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/navbar.css";
@@ -14,7 +13,7 @@ import {
   MdLogout,
 } from "react-icons/md";
 
-function Navbar({ onToggleSidebar, unreadNotifications = false, notifications = [] }) {
+function Navbar({ onToggleSidebar, unreadNotifications = false, notifications = [], title = "Dashboard" }) {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [hasUnreadNotifications, setHasUnreadNotifications] = useState(
@@ -80,7 +79,7 @@ function Navbar({ onToggleSidebar, unreadNotifications = false, notifications = 
     <div className="navbar" ref={navRef}>
       <div className="navbar-left">
         <MdMenu className="menu-icon" onClick={onToggleSidebar} title="Toggle Sidebar" />
-        <h1>Dashboard</h1>
+        <h1>{title}</h1>
       </div>
 
       <div className="navbar-right">
@@ -181,4 +180,3 @@ function Navbar({ onToggleSidebar, unreadNotifications = false, notifications = 
 }
 
 export default Navbar;
-```
