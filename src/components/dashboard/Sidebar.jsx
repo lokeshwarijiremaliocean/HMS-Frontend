@@ -1,5 +1,4 @@
-import { useNavigate } from "react-router-dom";
-
+import { useNavigate, useLocation } from "react-router-dom";
 import "../../styles/sidebar.css";
 
 import logo from "../../assets/campusnest-logo.png";
@@ -28,7 +27,9 @@ function Sidebar({
   activeStudentTab = "all",
   onSelectStudentTab,
 }) {
+function Sidebar({ isOpen = true, activePage = "dashboard", activeStudentTab = "all", onSelectStudentTab }) {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleStudentTabClick = (tab) => {
     if (onSelectStudentTab) {
@@ -46,15 +47,12 @@ function Sidebar({
     <aside className={`sidebar ${isOpen ? "" : "collapsed"}`}>
 
       <div className="sidebar-logo">
-        <img src={logo} alt="CampusNest" />
+        <img src={logo} alt="CampusNest" style={{ cursor: "pointer" }} onClick={() => navigate("/dashboard")} />
       </div>
 
       <div className="sidebar-menu">
 
-        <div
-          className={`menu-item ${activePage === "dashboard" ? "active" : ""}`}
-          onClick={() => navigate("/dashboard")}
-        >
+        <div className={`menu-item ${location.pathname === "/dashboard" ? "active" : ""}`} onClick={() => navigate("/dashboard")}>
           <MdDashboard />
           <span>Dashboard</span>
         </div>

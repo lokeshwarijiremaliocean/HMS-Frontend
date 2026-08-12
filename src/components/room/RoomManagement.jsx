@@ -182,6 +182,14 @@ function RoomManagement() {
         <Navbar
           title="Room Management"
           breadcrumb="Dashboard > Rooms"
+      {/* 1. FIXED SIDEBAR */}
+      <Sidebar isOpen={sidebarOpen} />
+
+      {/* MAIN LAYOUT */}
+      <main className="room-main">
+        {/* Shared Navbar with 👤 Admin Profile and 🔔 Notification Bell */}
+        <Navbar
+          title="Room Management"
           onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
         />
 

@@ -13,13 +13,14 @@ import {
 } from "react-icons/md";
 
 import Sidebar from "../dashboard/Sidebar";
-import admin from "../../assets/admin.png";
+import Navbar from "../dashboard/Navbar";
 import { addHostel, searchHostel, deleteHostel } from "../../api/hostelApi";
 
 import "../../styles/hostelManagement.css";
 
 function HostelManagement() {
   const [activeMode, setActiveMode] = useState("add"); // "add", "search", "delete"
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // Form states
   const [formData, setFormData] = useState({
@@ -176,35 +177,14 @@ function HostelManagement() {
 
   return (
     <div className="hostel-management-container">
-      <Sidebar />
+      <Sidebar isOpen={sidebarOpen} />
 
       <main className="hostel-management-main">
-        {/* ---- Navbar ---- */}
-        <div className="hostel-navbar">
-          <div className="hostel-navbar-left">
-            <MdMenu className="hm-menu-icon" />
-            <div className="hm-title-group">
-              <h1>Hostel Management</h1>
-              <p>Manage and organize your campus hostels</p>
-            </div>
-          </div>
-
-          <div className="hostel-navbar-right">
-            <div className="hm-notification">
-              <MdNotifications />
-              <span className="hm-badge">3</span>
-            </div>
-
-            <img src={admin} alt="Admin" className="hm-admin-image" />
-
-            <div className="hm-admin-info">
-              <h4>Admin</h4>
-              <p>Hostel Administrator</p>
-            </div>
-
-            <MdKeyboardArrowDown className="hm-dropdown-icon" />
-          </div>
-        </div>
+        {/* Shared Navbar with 👤 Admin Profile and 🔔 Notification Bell */}
+        <Navbar
+          title="Hostel Management"
+          onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
+        />
 
         {/* ---- Action Cards (Interactive Mode Selectors) ---- */}
         <div className="hm-action-cards">
