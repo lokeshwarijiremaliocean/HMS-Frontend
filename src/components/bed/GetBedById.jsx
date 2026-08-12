@@ -24,17 +24,38 @@ function GetBedById({ initialBedId = null, onSelectEdit, onSelectDelete, showToa
 
     try {
       const res = await getBedById(targetId);
+
+      if (res.data && res.data.success === false) {
+        const msg = res.data.message || "Bed not found";
+        setErrorMessage(msg);
+        if (showToast) showToast("error", msg);
+        return;
+      }
+
       const data = res.data?.data || res.data;
-      if (data && (data.id || data.bed_id || data.room_no || data.bed_no)) {
+      if (data && typeof data === "object" && Object.keys(data).length > 0 && (data.id || data.bed_id || data.room_no || data.bed_no)) {
         setBedData(data);
-        if (showToast) showToast("success", "Bed details retrieved successfully.");
+        if (showToast) showToast("success", res.data?.message || "Bed details retrieved successfully.");
       } else {
-        setErrorMessage("Bed not found");
-        if (showToast) showToast("error", "Bed not found");
+        const msg = res.data?.message || "Bed not found";
+        setErrorMessage(msg);
+        if (showToast) showToast("error", msg);
       }
     } catch (err) {
       console.error("Get Bed By ID Error:", err);
-      const msg = err.response?.data?.message || err.response?.data?.detail || "Bed not found";
+      let msg = "Bed not found";
+      if (err.response?.data) {
+        const d = err.response.data;
+        if (typeof d.message === "string" && d.message.trim()) {
+          msg = d.message;
+        } else if (typeof d.detail === "string" && d.detail.trim()) {
+          msg = d.detail;
+        } else if (Array.isArray(d.detail) && d.detail.length > 0) {
+          msg = d.detail.map((item) => item.msg || item.message || JSON.stringify(item)).join(", ");
+        }
+      } else if (err.message) {
+        msg = err.message;
+      }
       setErrorMessage(msg);
       if (showToast) showToast("error", msg);
     } finally {

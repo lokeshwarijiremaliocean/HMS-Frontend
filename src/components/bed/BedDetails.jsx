@@ -3,7 +3,12 @@ import { MdEdit, MdDeleteOutline } from "react-icons/md";
 function BedDetails({ bed, onEdit, onDelete }) {
   if (!bed) return null;
 
-  const bedId = bed.id || bed.bed_id || "N/A";
+  const bedId =
+    bed.id !== undefined && bed.id !== null
+      ? bed.id
+      : bed.bed_id !== undefined && bed.bed_id !== null
+      ? bed.bed_id
+      : "N/A";
   const hostelDisplay =
     bed.hostel_name || (bed.hostel_id ? `Hostel ${bed.hostel_id}` : "N/A");
   const floorIdDisplay =
