@@ -105,7 +105,7 @@ function Sidebar({ isOpen = true, activePage = "dashboard", activeStudentTab = "
         </h4>
 
         <div
-          className={`menu-item ${activePage === "room" || activePage === "roomManagement" ? "active" : ""}`}
+          className={`menu-item ${location.pathname === "/room" ? "active" : ""}`}
           onClick={() => navigate("/room")}
         >
           <MdMeetingRoom />
@@ -135,6 +135,26 @@ function Sidebar({ isOpen = true, activePage = "dashboard", activeStudentTab = "
         <div className="menu-item">
           <MdLayers />
           <span>View Floors</span>
+        </div>
+
+        <h4>
+          BED MANAGEMENT
+          <MdKeyboardArrowDown className="arrow" />
+        </h4>
+
+        <div
+          className={`menu-item ${
+            activePage === "bedManagement" ||
+            location.pathname === "/bed" ||
+            location.pathname === "/bed-management" ||
+            location.pathname === "/beds"
+              ? "active"
+              : ""
+          }`}
+          onClick={() => navigate("/bed")}
+        >
+          <MdBed />
+          <span>Manage Beds</span>
         </div>
 
         <h4>
