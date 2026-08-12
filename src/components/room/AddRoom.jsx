@@ -51,26 +51,16 @@ function AddRoom({ onRoomAdded }) {
       }
 
       if (onRoomAdded) {
-        onRoomAdded({
-          floor: formData.floor,
-          roomNo: formData.roomNo,
-          totalBeds: parseInt(formData.totalBeds, 10),
-        });
+        onRoomAdded();
       }
 
       setFormData({ floor: "", roomNo: "", totalBeds: "" });
     } catch (err) {
       console.warn("Add Room Error:", err);
-      // Fallback local update
-      if (onRoomAdded) {
-        onRoomAdded({
-          floor: formData.floor,
-          roomNo: formData.roomNo,
-          totalBeds: parseInt(formData.totalBeds, 10),
-        });
-      }
-      setMessage({ type: "success", text: "Room added successfully" });
-      setFormData({ floor: "", roomNo: "", totalBeds: "" });
+      setMessage({
+        type: "error",
+        text: err.response?.data?.message || err.response?.data?.detail || "Failed to add room. Please check backend connection.",
+      });
     } finally {
       setLoading(false);
     }
