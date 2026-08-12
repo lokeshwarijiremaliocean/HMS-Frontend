@@ -248,7 +248,7 @@ function Dashboard() {
             title="TOTAL STUDENTS"
             value={totalStudents}
             subtitle="of 300 Capacity"
-            percentage={(totalStudents / 300) * 100}
+            percentage={Math.round((totalStudents / 300) * 100)}
             color="#2196F3"
           />
 
@@ -262,24 +262,24 @@ function Dashboard() {
             color="#4CAF50"
           />
 
-          {/* Occupied Rooms */}
+          {/* Occupied Beds */}
           <StatsCard
             icon={<MdMeetingRoom />}
-            title="OCCUPIED ROOMS"
-            value="83"
-            subtitle="83% Occupied"
-            percentage={83}
+            title="OCCUPIED BEDS"
+            value={totalStudents}
+            subtitle={`${Math.round((totalStudents / 300) * 100)}% Occupied`}
+            percentage={Math.round((totalStudents / 300) * 100)}
             color="#FFC107"
           />
 
-          {/* Available Rooms */}
+          {/* Available Beds */}
           <StatsCard
             icon={<MdHotel />}
-            title="AVAILABLE ROOMS"
-            value="17"
-            subtitle="17% Available"
-            percentage={17}
-            color="#7E57C2"
+            title="AVAILABLE BEDS"
+            value={Math.max(0, 300 - totalStudents)}
+            subtitle={`${Math.round((Math.max(0, 300 - totalStudents) / 300) * 100)}% Available`}
+            percentage={Math.round((Math.max(0, 300 - totalStudents) / 300) * 100)}
+            color="#9C27B0"
           />
 
           {/* Total Beds */}

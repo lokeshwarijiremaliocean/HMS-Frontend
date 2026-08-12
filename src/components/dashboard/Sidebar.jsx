@@ -20,6 +20,13 @@ import {
   MdKeyboardArrowDown,
 } from "react-icons/md";
 
+function Sidebar({
+  isOpen = true,
+  onToggle,
+  activePage = "dashboard",
+  activeStudentTab = "all",
+  onSelectStudentTab,
+}) {
 function Sidebar({ isOpen = true, activePage = "dashboard", activeStudentTab = "all", onSelectStudentTab }) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -97,7 +104,10 @@ function Sidebar({ isOpen = true, activePage = "dashboard", activeStudentTab = "
           <MdKeyboardArrowDown className="arrow" />
         </h4>
 
-        <div className="menu-item">
+        <div
+          className={`menu-item ${activePage === "room" || activePage === "roomManagement" ? "active" : ""}`}
+          onClick={() => navigate("/room")}
+        >
           <MdMeetingRoom />
           <span>View Rooms</span>
         </div>

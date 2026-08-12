@@ -6,6 +6,7 @@ import Register from "../pages/Register";
 import Dashboard from "../pages/Dashboard";
 import Hostel from "../pages/Hostel";
 import Room from "../pages/Room";
+import StudentManagement from "../pages/StudentManagement";
 import AdminProfile from "../pages/AdminProfile";
 import Settings from "../pages/Settings";
 
@@ -18,6 +19,8 @@ function AppRoutes() {
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/hostel" element={<Hostel />} />
       <Route path="/room" element={<Room />} />
+      <Route path="/student-management" element={<StudentManagement />} />
+      <Route path="/students" element={<StudentManagement />} />
       <Route path="/profile" element={<AdminProfile />} />
       <Route path="/settings" element={<Settings />} />
     </Routes>

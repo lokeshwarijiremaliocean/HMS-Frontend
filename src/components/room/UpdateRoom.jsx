@@ -107,22 +107,14 @@ function UpdateRoom({ rooms, initialRoomId, onRoomUpdated }) {
       }
 
       if (onRoomUpdated) {
-        onRoomUpdated(searchId, {
-          floor: formData.floor,
-          roomNo: formData.roomNo,
-          totalBeds: parseInt(formData.totalBeds, 10),
-        });
+        onRoomUpdated();
       }
     } catch (err) {
       console.warn("Update Room Error:", err);
-      if (onRoomUpdated) {
-        onRoomUpdated(searchId, {
-          floor: formData.floor,
-          roomNo: formData.roomNo,
-          totalBeds: parseInt(formData.totalBeds, 10),
-        });
-      }
-      setMessage({ type: "success", text: "Room updated successfully" });
+      setMessage({
+        type: "error",
+        text: err.response?.data?.message || err.response?.data?.detail || "Failed to update room. Please check backend connection.",
+      });
     } finally {
       setLoading(false);
     }
