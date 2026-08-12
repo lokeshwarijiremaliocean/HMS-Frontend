@@ -24,10 +24,10 @@ function AppRoutes() {
       <Route path="/floor-management" element={<Floor />} />
       <Route path="/floors" element={<Floor />} />
       <Route path="/room" element={<Room />} />
+      <Route path="/rooms" element={<Room />} />
       <Route path="/bed" element={<Bed />} />
       <Route path="/bed-management" element={<Bed />} />
       <Route path="/beds" element={<Bed />} />
-      <Route path="/student-management" element={<StudentManagement />} />
       <Route path="/student-management" element={<StudentManagement />} />
       <Route path="/students" element={<StudentManagement />} />
       <Route path="/profile" element={<AdminProfile />} />

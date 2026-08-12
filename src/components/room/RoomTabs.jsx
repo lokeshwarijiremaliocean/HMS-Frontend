@@ -10,10 +10,10 @@ function RoomTabs({ activeTab, setActiveTab }) {
   return (
     <div className="rm-action-tabs">
       <button
-        className={`rm-tab-btn ${activeTab === "all" ? "active" : ""}`}
+        className={`rm-tab-btn ${activeTab === "all" || activeTab === "view" ? "active" : ""}`}
         onClick={() => setActiveTab("all")}
       >
-        <MdFormatListBulleted /> All Rooms
+        <MdFormatListBulleted /> View Rooms
       </button>
 
       <button
@@ -24,10 +24,10 @@ function RoomTabs({ activeTab, setActiveTab }) {
       </button>
 
       <button
-        className={`rm-tab-btn ${activeTab === "get" ? "active" : ""}`}
+        className={`rm-tab-btn ${activeTab === "get" || activeTab === "search" ? "active" : ""}`}
         onClick={() => setActiveTab("get")}
       >
-        <MdSearch /> Get Room by ID
+        <MdSearch /> Search Room
       </button>
 
       <button

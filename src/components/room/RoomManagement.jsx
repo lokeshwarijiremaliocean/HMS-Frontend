@@ -26,10 +26,20 @@ import DeleteRoom from "./DeleteRoom";
 import { getAllRooms } from "../../api/roomApi";
 import "../../styles/roomManagement.css";
 
+import { useLocation } from "react-router-dom";
+
 function RoomManagement() {
+  const location = useLocation();
   const [activeRoomTab, setActiveRoomTab] = useState("all");
   const [selectedRoomId, setSelectedRoomId] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  useEffect(() => {
+    if (location.state?.tab) {
+      const tab = location.state.tab;
+      setActiveRoomTab(tab === "search" ? "get" : tab);
+    }
+  }, [location.state]);
 
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
