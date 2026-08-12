@@ -38,16 +38,15 @@ function DeleteRoom({ initialRoomId, onRoomDeleted }) {
       }
 
       if (onRoomDeleted) {
-        onRoomDeleted(deleteId);
+        onRoomDeleted();
       }
       setDeleteId("");
     } catch (err) {
       console.warn("Delete Room Error:", err);
-      if (onRoomDeleted) {
-        onRoomDeleted(deleteId);
-      }
-      setMessage({ type: "success", text: "Room deleted successfully" });
-      setDeleteId("");
+      setMessage({
+        type: "error",
+        text: err.response?.data?.message || err.response?.data?.detail || "Failed to delete room. Please check backend connection.",
+      });
     } finally {
       setLoading(false);
     }

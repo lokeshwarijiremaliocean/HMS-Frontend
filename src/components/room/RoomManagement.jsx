@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   MdMenu,
   MdNotifications,
@@ -7,10 +7,14 @@ import {
   MdBed,
   MdHotel,
   MdApartment,
+  MdRefresh,
+  MdErrorOutline,
+  MdAdd,
 } from "react-icons/md";
 
 import Sidebar from "../dashboard/Sidebar";
 import Navbar from "../dashboard/Navbar";
+import admin from "../../assets/admin.png";
 
 import RoomTabs from "./RoomTabs";
 import AllRooms from "./AllRooms";
@@ -27,90 +31,127 @@ function RoomManagement() {
   const [selectedRoomId, setSelectedRoomId] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  // Initial Rooms Data
-  const initialRooms = [
-    { id: 1, floor: "Floor 1", roomNo: "101", totalBeds: 3, occupiedBeds: 2, availableBeds: 1 },
-    { id: 2, floor: "Floor 1", roomNo: "102", totalBeds: 3, occupiedBeds: 3, availableBeds: 0 },
-    { id: 3, floor: "Floor 2", roomNo: "201", totalBeds: 3, occupiedBeds: 1, availableBeds: 2 },
-    { id: 4, floor: "Floor 2", roomNo: "202", totalBeds: 3, occupiedBeds: 3, availableBeds: 0 },
-    { id: 5, floor: "Floor 3", roomNo: "301", totalBeds: 3, occupiedBeds: 2, availableBeds: 1 },
-    { id: 6, floor: "Floor 3", roomNo: "302", totalBeds: 3, occupiedBeds: 0, availableBeds: 3 },
-    { id: 7, floor: "Floor 4", roomNo: "401", totalBeds: 3, occupiedBeds: 1, availableBeds: 2 },
-    { id: 8, floor: "Floor 4", roomNo: "402", totalBeds: 3, occupiedBeds: 2, availableBeds: 1 },
-    { id: 9, floor: "Floor 5", roomNo: "501", totalBeds: 3, occupiedBeds: 3, availableBeds: 0 },
-    { id: 10, floor: "Floor 5", roomNo: "502", totalBeds: 3, occupiedBeds: 1, availableBeds: 2 },
-  ];
+  const [rooms, setRooms] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [apiError, setApiError] = useState(null);
 
-  const [rooms, setRooms] = useState(initialRooms);
+  // Fetch rooms & student allocations from backend API
+  const fetchRooms = useCallback(async () => {
+    setLoading(true);
+    setApiError(null);
 
-  // Fetch rooms on mount
-  useEffect(() => {
-    const fetchRooms = async () => {
-      try {
-        const res = await getAllRooms();
-        if (res.data && (res.data.success || Array.isArray(res.data))) {
-          const list = res.data.data || res.data;
-          if (Array.isArray(list) && list.length > 0) {
-            setRooms(
-              list.map((r, i) => ({
-                id: r.id || i + 1,
-                floor: r.floor_name || r.floor || `Floor ${r.floor_id || 1}`,
-                roomNo: String(r.room_no || r.roomNo || r.id),
-                totalBeds: r.total_beds || r.totalBeds || 3,
-                occupiedBeds: r.occupied_beds || r.occupiedBeds || 0,
-                availableBeds: r.available_beds || r.availableBeds || (r.total_beds || 3),
-              }))
-            );
+    try {
+      // 1. Fetch Rooms & Students in parallel
+      const [roomsRes, studentRes] = await Promise.allSettled([
+        getAllRooms(),
+        apiClient.get("/student"),
+      ]);
+
+      let rawRooms = [];
+      let studentList = [];
+
+      if (roomsRes.status === "fulfilled" && roomsRes.value.data) {
+        const resData = roomsRes.value.data;
+        if (Array.isArray(resData)) {
+          rawRooms = resData;
+        } else if (resData.success && Array.isArray(resData.data)) {
+          rawRooms = resData.data;
+        } else if (Array.isArray(resData.data)) {
+          rawRooms = resData.data;
+        }
+      }
+
+      if (studentRes.status === "fulfilled" && studentRes.value.data) {
+        const sData = studentRes.value.data;
+        if (Array.isArray(sData)) {
+          studentList = sData;
+        } else if (sData.success && Array.isArray(sData.data)) {
+          studentList = sData.data;
+        }
+      }
+
+      // Map room allocations from student list
+      const roomOccupancyMap = {};
+      studentList.forEach((s) => {
+        const rNo = String(s.room_no || s.roomNo || "").trim();
+        if (rNo) {
+          roomOccupancyMap[rNo] = (roomOccupancyMap[rNo] || 0) + 1;
+        }
+      });
+
+      // If backend returns empty room array, generate the physical 10 floors x 10 rooms infrastructure (100 rooms / 300 beds)
+      let roomSource = rawRooms;
+      if (roomSource.length === 0) {
+        roomSource = [];
+        for (let floor = 1; floor <= 10; floor++) {
+          for (let r = 1; r <= 10; r++) {
+            const roomNo = `${floor}${r < 10 ? "0" + r : r}`;
+            roomSource.push({
+              id: (floor - 1) * 10 + r,
+              floor_name: `Floor ${floor}`,
+              room_no: roomNo,
+              total_beds: 3,
+              occupied_beds: 0,
+            });
           }
         }
-      } catch (err) {
-        console.log("Rooms data loaded locally:", err.message);
       }
-    };
 
-    fetchRooms();
+      const formattedList = roomSource.map((r, i) => {
+        const totalBeds = Number(r.total_beds ?? r.totalBeds ?? 3);
+        const roomNo = String(r.room_no || r.roomNo || r.id || i + 1);
+        const occupiedBeds = Number(r.occupied_beds ?? r.occupiedBeds ?? (roomOccupancyMap[roomNo] || 0));
+        const availableBeds = Math.max(0, totalBeds - occupiedBeds);
+        const floorName = r.floor_name || r.floor || (r.floor_id ? `Floor ${r.floor_id}` : "Floor 1");
+
+        return {
+          id: r.id || i + 1,
+          rawId: r.id,
+          floor: floorName,
+          roomNo,
+          totalBeds,
+          occupiedBeds,
+          availableBeds,
+        };
+      });
+
+      setRooms(formattedList);
+    } catch (err) {
+      console.warn("Failed to fetch rooms from backend:", err.message);
+      setApiError("Unable to load rooms. Please check the server connection and try again.");
+      setRooms([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  // Handler: Add room callback
-  const handleRoomAdded = (newRoomData) => {
-    const newRoom = {
-      id: rooms.length + 1,
-      floor: newRoomData.floor,
-      roomNo: newRoomData.roomNo,
-      totalBeds: newRoomData.totalBeds,
-      occupiedBeds: 0,
-      availableBeds: newRoomData.totalBeds,
-    };
-    setRooms((prev) => [...prev, newRoom]);
+  useEffect(() => {
+    fetchRooms();
+  }, [fetchRooms]);
+
+  // Compute stats dynamically from real backend rooms data
+  const totalRooms = rooms.length;
+  const totalBeds = rooms.reduce((acc, r) => acc + r.totalBeds, 0);
+  const occupiedBeds = rooms.reduce((acc, r) => acc + r.occupiedBeds, 0);
+  const availableBeds = rooms.reduce((acc, r) => acc + r.availableBeds, 0);
+  const totalFloors = new Set(rooms.map((r) => r.floor)).size;
+
+  // Handlers for child tabs
+  const handleRoomAdded = () => {
+    fetchRooms();
+    setActiveRoomTab("all");
   };
 
-  // Handler: Update room callback
-  const handleRoomUpdated = (id, updatedData) => {
-    setRooms((prev) =>
-      prev.map((r) =>
-        String(r.id) === String(id) || String(r.roomNo) === String(id)
-          ? {
-              ...r,
-              floor: updatedData.floor,
-              roomNo: updatedData.roomNo,
-              totalBeds: updatedData.totalBeds,
-              availableBeds: updatedData.totalBeds - r.occupiedBeds,
-            }
-          : r
-      )
-    );
+  const handleRoomUpdated = () => {
+    fetchRooms();
+    setActiveRoomTab("all");
   };
 
-  // Handler: Delete room callback
-  const handleRoomDeleted = (id) => {
-    setRooms((prev) =>
-      prev.filter(
-        (r) => String(r.id) !== String(id) && String(r.roomNo) !== String(id)
-      )
-    );
+  const handleRoomDeleted = () => {
+    fetchRooms();
+    setActiveRoomTab("all");
   };
 
-  // Row action handlers from AllRooms table
   const handleSelectEdit = (id) => {
     setSelectedRoomId(id);
     setActiveRoomTab("update");
@@ -128,6 +169,19 @@ function RoomManagement() {
 
   return (
     <div className="room-container">
+      {/* SIDEBAR */}
+      <Sidebar
+        activePage="room"
+        isOpen={sidebarOpen}
+        onToggle={() => setSidebarOpen((prev) => !prev)}
+      />
+
+      {/* MAIN LAYOUT */}
+      <main className="room-main">
+        {/* NAVBAR */}
+        <Navbar
+          title="Room Management"
+          breadcrumb="Dashboard > Rooms"
       {/* 1. FIXED SIDEBAR */}
       <Sidebar isOpen={sidebarOpen} />
 
@@ -139,16 +193,16 @@ function RoomManagement() {
           onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
         />
 
-        {/* 3. FIXED STATISTICS OVERVIEW CARDS (Always visible) */}
+        {/* STATISTICS OVERVIEW CARDS (Dynamically Calculated) */}
         <section className="rm-stats-grid">
           <div className="rm-stat-card">
             <div className="rm-stat-icon orange">
               <MdMeetingRoom />
             </div>
             <div className="rm-stat-info">
-              <h2>100</h2>
+              <h2>{loading ? "-" : totalRooms}</h2>
               <p>Total Rooms</p>
-              <span className="rm-stat-link">View All &rarr;</span>
+              <span className="rm-stat-link" onClick={() => setActiveRoomTab("all")}>View All &rarr;</span>
             </div>
           </div>
 
@@ -157,9 +211,9 @@ function RoomManagement() {
               <MdBed />
             </div>
             <div className="rm-stat-info">
-              <h2>300</h2>
+              <h2>{loading ? "-" : totalBeds}</h2>
               <p>Total Beds</p>
-              <span className="rm-stat-link">View All &rarr;</span>
+              <span className="rm-stat-link" onClick={() => setActiveRoomTab("all")}>View All &rarr;</span>
             </div>
           </div>
 
@@ -168,9 +222,9 @@ function RoomManagement() {
               <MdHotel />
             </div>
             <div className="rm-stat-info">
-              <h2>83</h2>
+              <h2>{loading ? "-" : occupiedBeds}</h2>
               <p>Occupied Beds</p>
-              <span className="rm-stat-link">View All &rarr;</span>
+              <span className="rm-stat-link" onClick={() => setActiveRoomTab("all")}>View All &rarr;</span>
             </div>
           </div>
 
@@ -179,9 +233,9 @@ function RoomManagement() {
               <MdBed />
             </div>
             <div className="rm-stat-info">
-              <h2>17</h2>
+              <h2>{loading ? "-" : availableBeds}</h2>
               <p>Available Beds</p>
-              <span className="rm-stat-link">View All &rarr;</span>
+              <span className="rm-stat-link" onClick={() => setActiveRoomTab("all")}>View All &rarr;</span>
             </div>
           </div>
 
@@ -190,14 +244,14 @@ function RoomManagement() {
               <MdApartment />
             </div>
             <div className="rm-stat-info">
-              <h2>10</h2>
+              <h2>{loading ? "-" : totalFloors}</h2>
               <p>Total Floors</p>
-              <span className="rm-stat-link">View All &rarr;</span>
+              <span className="rm-stat-link" onClick={() => setActiveRoomTab("all")}>View All &rarr;</span>
             </div>
           </div>
         </section>
 
-        {/* 4. FIXED ROOM ACTION TAB BAR */}
+        {/* ROOM ACTION TAB BAR */}
         <RoomTabs
           activeTab={activeRoomTab}
           setActiveTab={(tab) => {
@@ -206,11 +260,31 @@ function RoomManagement() {
           }}
         />
 
-        {/* 5. SINGLE MAIN CONTENT AREA (Dynamically replaced by active tab state) */}
+        {/* MAIN CONTENT AREA */}
         <div className="rm-content-area">
+          {apiError && (
+            <div className="rm-alert error" style={{ marginBottom: "20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <MdErrorOutline style={{ fontSize: "20px" }} />
+                <span>{apiError}</span>
+              </div>
+              <button
+                className="rm-btn-reset"
+                style={{ padding: "6px 12px", fontSize: "13px" }}
+                onClick={fetchRooms}
+              >
+                <MdRefresh /> Retry
+              </button>
+            </div>
+          )}
+
           {activeRoomTab === "all" && (
             <AllRooms
               rooms={rooms}
+              loading={loading}
+              error={apiError}
+              onRetry={fetchRooms}
+              onAddClick={() => setActiveRoomTab("add")}
               onSelectEdit={handleSelectEdit}
               onSelectDelete={handleSelectDelete}
               onSelectView={handleSelectView}
@@ -235,6 +309,7 @@ function RoomManagement() {
 
           {activeRoomTab === "delete" && (
             <DeleteRoom
+              rooms={rooms}
               initialRoomId={selectedRoomId}
               onRoomDeleted={handleRoomDeleted}
             />

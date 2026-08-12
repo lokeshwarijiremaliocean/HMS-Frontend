@@ -24,6 +24,8 @@ function AppRoutes() {
       <Route path="/bed-management" element={<Bed />} />
       <Route path="/beds" element={<Bed />} />
       <Route path="/student-management" element={<StudentManagement />} />
+      <Route path="/student-management" element={<StudentManagement />} />
+      <Route path="/students" element={<StudentManagement />} />
       <Route path="/profile" element={<AdminProfile />} />
       <Route path="/settings" element={<Settings />} />
     </Routes>

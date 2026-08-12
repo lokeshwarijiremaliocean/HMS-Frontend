@@ -20,6 +20,13 @@ import {
   MdKeyboardArrowDown,
 } from "react-icons/md";
 
+function Sidebar({
+  isOpen = true,
+  onToggle,
+  activePage = "dashboard",
+  activeStudentTab = "all",
+  onSelectStudentTab,
+}) {
 function Sidebar({ isOpen = true, activePage = "dashboard", activeStudentTab = "all", onSelectStudentTab }) {
   const navigate = useNavigate();
   const location = useLocation();
