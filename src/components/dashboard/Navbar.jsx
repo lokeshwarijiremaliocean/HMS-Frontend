@@ -13,7 +13,7 @@ import {
   MdLogout,
 } from "react-icons/md";
 
-function Navbar({ onToggleSidebar, unreadNotifications = false, notifications = [], title = "Dashboard" }) {
+function Navbar({ onToggleSidebar, unreadNotifications = false, notifications = [], title = "Dashboard", breadcrumb = null }) {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [hasUnreadNotifications, setHasUnreadNotifications] = useState(
@@ -79,7 +79,10 @@ function Navbar({ onToggleSidebar, unreadNotifications = false, notifications = 
     <div className="navbar" ref={navRef}>
       <div className="navbar-left">
         <MdMenu className="menu-icon" onClick={onToggleSidebar} title="Toggle Sidebar" />
-        <h1>{title}</h1>
+        <div>
+          <h1>{title}</h1>
+          {breadcrumb && <div className="navbar-breadcrumb">{breadcrumb}</div>}
+        </div>
       </div>
 
       <div className="navbar-right">

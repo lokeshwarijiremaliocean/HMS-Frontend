@@ -69,7 +69,7 @@ const SEARCH_CATEGORIES = [
     title: "Bed Info",
     subtitle: "Allocate Bed",
     icon: <MdBed />,
-    route: null,
+    route: "/bed",
     keywords: ["bed", "beds", "bed info", "allocate bed", "bea"],
   },
 ];
