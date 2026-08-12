@@ -61,7 +61,7 @@ const SEARCH_CATEGORIES = [
     title: "Floor",
     subtitle: "Floor Search",
     icon: <MdApartment />,
-    route: null,
+    route: "/floor",
     keywords: ["floor", "floors", "flo", "floor search"],
   },
   {

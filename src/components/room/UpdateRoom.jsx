@@ -14,14 +14,6 @@ function UpdateRoom({ rooms, initialRoomId, onRoomUpdated }) {
     totalBeds: "",
   });
 
-  // Automatically fetch if initialRoomId passed from table edit action
-  useEffect(() => {
-    if (initialRoomId) {
-      setSearchId(initialRoomId);
-      handleFetch(null, initialRoomId);
-    }
-  }, [initialRoomId]);
-
   const handleFetch = async (e, customId) => {
     if (e) e.preventDefault();
     const idToUse = customId || searchId;
@@ -49,6 +41,14 @@ function UpdateRoom({ rooms, initialRoomId, onRoomUpdated }) {
       setLoading(false);
     }
   };
+
+  // Automatically fetch if initialRoomId passed from table edit action
+  useEffect(() => {
+    if (initialRoomId) {
+      setSearchId(initialRoomId);
+      handleFetch(null, initialRoomId);
+    }
+  }, [initialRoomId]);
 
   const findLocalAndSet = (id) => {
     const found = rooms.find(
