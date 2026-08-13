@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { useLocation } from "react-router-dom";
 import Sidebar from "../dashboard/Sidebar";
 import Navbar from "../dashboard/Navbar";
 
@@ -15,9 +16,17 @@ import { getAllBeds } from "../../api/bedApi";
 import "../../styles/bedManagement.css";
 
 function BedManagement() {
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState("all");
   const [selectedBedId, setSelectedBedId] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  useEffect(() => {
+    if (location.state?.tab) {
+      const tab = location.state.tab;
+      setActiveTab(tab === "search" ? "get" : tab);
+    }
+  }, [location.state]);
 
   // Real backend bed data - starts EMPTY (ZERO hardcoded data)
   const [beds, setBeds] = useState([]);

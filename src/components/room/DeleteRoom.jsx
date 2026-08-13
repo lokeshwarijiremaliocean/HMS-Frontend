@@ -16,7 +16,7 @@ function DeleteRoom({ initialRoomId, onRoomDeleted }) {
 
   const handleDeleteClick = (e) => {
     e.preventDefault();
-    if (!deleteId) {
+    if (!deleteId.toString().trim()) {
       setMessage({ type: "error", text: "Please enter a Room ID to delete." });
       return;
     }
@@ -30,22 +30,29 @@ function DeleteRoom({ initialRoomId, onRoomDeleted }) {
     setMessage({ type: "", text: "" });
 
     try {
-      const res = await deleteRoom(deleteId);
-      if (res.data && (res.data.success || res.data.message)) {
-        setMessage({ type: "success", text: res.data.message || "Room deleted successfully" });
-      } else {
-        setMessage({ type: "success", text: "Room deleted successfully" });
-      }
+      const res = await deleteRoom(deleteId.toString().trim());
+      const resData = res.data;
 
-      if (onRoomDeleted) {
-        onRoomDeleted();
+      if (resData && resData.success !== false) {
+        setMessage({ type: "success", text: resData.message || "Room deleted successfully" });
+        setDeleteId("");
+        if (onRoomDeleted) {
+          onRoomDeleted();
+        }
+      } else {
+        setMessage({ type: "error", text: resData?.message || "Failed to delete room" });
       }
-      setDeleteId("");
     } catch (err) {
       console.warn("Delete Room Error:", err);
+      const errMsg =
+        err.response?.data?.message ||
+        (Array.isArray(err.response?.data?.detail)
+          ? err.response.data.detail[0]?.msg
+          : err.response?.data?.detail) ||
+        "Failed to delete room. Please check backend connection.";
       setMessage({
         type: "error",
-        text: err.response?.data?.message || err.response?.data?.detail || "Failed to delete room. Please check backend connection.",
+        text: errMsg,
       });
     } finally {
       setLoading(false);
@@ -113,6 +120,7 @@ function DeleteRoom({ initialRoomId, onRoomDeleted }) {
             type="button"
             className="rm-btn-reset"
             onClick={() => setDeleteId("")}
+            disabled={loading}
           >
             <MdClose /> Cancel
           </button>
@@ -156,3 +164,4 @@ function DeleteRoom({ initialRoomId, onRoomDeleted }) {
 }
 
 export default DeleteRoom;
+

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import Sidebar from "../dashboard/Sidebar";
 import Navbar from "../dashboard/Navbar";
@@ -7,6 +7,8 @@ import FloorTabs from "./FloorTabs";
 import ViewFloors from "./ViewFloors";
 import SearchFloor from "./SearchFloor";
 import AddFloor from "./AddFloor";
+import UpdateFloor from "./UpdateFloor";
+import DeleteFloor from "./DeleteFloor";
 import FloorDetailsModal from "./FloorDetailsModal";
 
 import "../../styles/floorManagement.css";
@@ -82,12 +84,16 @@ const INITIAL_MOCK_FLOORS = [
 
 function FloorManagement() {
   const location = useLocation();
-  const initialTab = location.state?.tab || "view";
-
-  const [activeTab, setActiveTab] = useState(initialTab);
+  const [activeTab, setActiveTab] = useState("view");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [floors, setFloors] = useState(INITIAL_MOCK_FLOORS);
   const [selectedFloor, setSelectedFloor] = useState(null);
+
+  useEffect(() => {
+    if (location.state?.tab) {
+      setActiveTab(location.state.tab);
+    }
+  }, [location.state]);
 
   const handleSelectView = (floor) => {
     setSelectedFloor(floor);
@@ -95,6 +101,19 @@ function FloorManagement() {
 
   const handleFloorAdded = (newFloor) => {
     setFloors((prev) => [newFloor, ...prev]);
+    setActiveTab("view");
+  };
+
+  const handleFloorUpdated = (updatedFloor) => {
+    setFloors((prev) =>
+      prev.map((f) => (f.id === updatedFloor.id ? { ...f, ...updatedFloor } : f))
+    );
+    setActiveTab("view");
+  };
+
+  const handleFloorDeleted = (deletedId) => {
+    setFloors((prev) => prev.filter((f) => f.id !== deletedId));
+    setActiveTab("view");
   };
 
   return (
@@ -130,6 +149,12 @@ function FloorManagement() {
           />
         )}
 
+        {activeTab === "add" && (
+          <AddFloor
+            onFloorAdded={handleFloorAdded}
+          />
+        )}
+
         {activeTab === "search" && (
           <SearchFloor
             floors={floors}
@@ -137,9 +162,17 @@ function FloorManagement() {
           />
         )}
 
-        {activeTab === "add" && (
-          <AddFloor
-            onFloorAdded={handleFloorAdded}
+        {activeTab === "update" && (
+          <UpdateFloor
+            floors={floors}
+            onFloorUpdated={handleFloorUpdated}
+          />
+        )}
+
+        {activeTab === "delete" && (
+          <DeleteFloor
+            floors={floors}
+            onFloorDeleted={handleFloorDeleted}
           />
         )}
       </main>
