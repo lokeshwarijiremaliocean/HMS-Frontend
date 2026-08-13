@@ -108,3 +108,29 @@
 .popup-ok-btn:active {
   transform: translateY(0);
 }
+
+.alert-icon-container {
+  width: 72px;
+  height: 72px;
+  background: #fde8e8;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.alert-icon {
+  font-size: 48px;
+  color: #e53e3e;
+}
+
+.alert-btn {
+  background: #8D2F2A;
+  box-shadow: 0 4px 12px rgba(141, 47, 42, 0.3);
+}
+
+.alert-btn:hover {
+  background: #742521;
+  box-shadow: 0 6px 16px rgba(141, 47, 42, 0.4);
+}
