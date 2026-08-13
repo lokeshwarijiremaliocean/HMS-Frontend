@@ -6,6 +6,7 @@ import "../styles/auth.css";
 import LeftPanel from "../components/auth/LeftPanel";
 import InputField from "../components/auth/InputField";
 import Button from "../components/auth/Button";
+import SuccessPopup from "../components/common/SuccessPopup";
 
 import { sendOTP } from "../api/authapi";
 
@@ -14,6 +15,7 @@ function EmailVerification() {
 
   const [email, setEmail] = useState("");
   const [sending, setSending] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
 
   const handleContinue = async () => {
     if (!email) {
@@ -28,13 +30,7 @@ function EmailVerification() {
 
       console.log("OTP Response:", response.data);
 
-      alert("OTP Sent Successfully!");
-
-      navigate("/otp", {
-        state: {
-          email: email,
-        },
-      });
+      setShowPopup(true);
     } catch (error) {
       console.error("OTP Error:", error);
 
@@ -44,19 +40,23 @@ function EmailVerification() {
     }
   };
 
+  const handlePopupConfirm = () => {
+    setShowPopup(false);
+    navigate("/otp", {
+      state: {
+        email: email,
+      },
+    });
+  };
 
   return (
-
     <div className="page">
-
       <LeftPanel />
 
       <div className="card">
-
         <h1 className="email-title">
           What's Your Email ?
         </h1>
-
 
         <InputField
           placeholder="Enter Your Email ID"
@@ -64,19 +64,20 @@ function EmailVerification() {
           onChange={(e) => setEmail(e.target.value)}
         />
 
-
         <Button
           title="Continue"
           onClick={handleContinue}
         />
-
-
       </div>
 
+      <SuccessPopup
+        isOpen={showPopup}
+        title="OTP Sent Successfully!"
+        message="Your OTP has been sent successfully."
+        onConfirm={handlePopupConfirm}
+      />
     </div>
-
   );
-
 }
 
 export default EmailVerification;

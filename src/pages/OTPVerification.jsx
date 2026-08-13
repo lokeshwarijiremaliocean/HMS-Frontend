@@ -5,6 +5,7 @@ import { verifyOTP } from "../api/authapi";
 import "../styles/auth.css";
 
 import LeftPanel from "../components/auth/LeftPanel";
+import SuccessPopup from "../components/common/SuccessPopup";
 
 function OTPVerification() {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ function OTPVerification() {
 
   const [otp, setOtp] = useState(["", "", "", ""]);
   const [verifying, setVerifying] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
 
   const handleChange = (value, index) => {
     if (!/^[0-9]?$/.test(value)) {
@@ -58,8 +60,7 @@ function OTPVerification() {
           localStorage.setItem("access_token", token);
           localStorage.setItem("token", token);
         }
-        alert("OTP Verified Successfully");
-        navigate("/register");
+        setShowPopup(true);
       } else {
         alert(response.data.message || "Invalid OTP");
       }
@@ -69,6 +70,11 @@ function OTPVerification() {
     } finally {
       setVerifying(false);
     }
+  };
+
+  const handlePopupConfirm = () => {
+    setShowPopup(false);
+    navigate("/register");
   };
 
   return (
@@ -107,6 +113,13 @@ function OTPVerification() {
           Resend code
         </p>
       </div>
+
+      <SuccessPopup
+        isOpen={showPopup}
+        title="OTP Verified Successfully"
+        message="Your OTP has been verified successfully."
+        onConfirm={handlePopupConfirm}
+      />
     </div>
   );
 }
