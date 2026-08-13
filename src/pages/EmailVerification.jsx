@@ -34,7 +34,14 @@ function EmailVerification() {
     } catch (error) {
       console.error("OTP Error:", error);
 
-      alert("Failed to send OTP");
+      const errorMessage =
+        error.response?.data?.detail ||
+        error.response?.data?.message ||
+        (error.code === "ERR_NETWORK" || !error.response
+          ? `Cannot connect to backend server (${import.meta.env.VITE_API_URL || "http://127.0.0.1:8000"}). Please check if your backend server is running.`
+          : "Failed to send OTP. Please try again.");
+
+      alert(errorMessage);
     } finally {
       setSending(false);
     }

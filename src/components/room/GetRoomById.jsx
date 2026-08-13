@@ -2,11 +2,10 @@ import { useState } from "react";
 import { MdSearch, MdContentPasteSearch } from "react-icons/md";
 import { getRoomById } from "../../api/roomApi";
 
-function GetRoomById({ rooms }) {
+function GetRoomById({ rooms = [] }) {
   const [searchId, setSearchId] = useState("");
   const [roomDetails, setRoomDetails] = useState(null);
   const [errorMsg, setErrorMsg] = useState("");
-  const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleSearch = async (e) => {
@@ -16,41 +15,39 @@ function GetRoomById({ rooms }) {
     setLoading(true);
     setErrorMsg("");
     setRoomDetails(null);
-    setSearched(true);
 
     try {
-      const res = await getRoomById(searchId);
-      if (res.data && (res.data.data || res.data.room_no || res.data.id)) {
-        const item = res.data.data || res.data;
+      const res = await getRoomById(searchId.trim());
+      const resData = res.data;
+
+      if (resData && resData.success !== false && (resData.data || resData.room_no || resData.id)) {
+        const item = resData.data || resData;
+        const floorDisplay = item.floor_name || item.floor || (item.floor_id || item.floor_no ? `F${item.floor_id || item.floor_no}` : "F1");
+        const totalBeds = Number(item.total_beds ?? item.totalBeds ?? 3);
+        const occupiedBeds = Number(item.occupied_beds ?? item.occupiedBeds ?? 0);
+        const availableBeds = Number(item.available_beds ?? item.availableBeds ?? Math.max(0, totalBeds - occupiedBeds));
+
         setRoomDetails({
           id: item.id || searchId,
-          floor: item.floor_name || item.floor || `Floor ${item.floor_id || item.floor_no || 1}`,
+          floor: floorDisplay,
           roomNo: String(item.room_no || item.roomNo || item.id),
-          totalBeds: item.total_beds || item.totalBeds || 3,
-          occupiedBeds: item.occupied_beds || item.occupiedBeds || 0,
-          availableBeds: item.available_beds || item.availableBeds || 3,
+          totalBeds,
+          occupiedBeds,
+          availableBeds,
         });
       } else {
-        // Fallback to local rooms state search by id or roomNo
-        findLocalRoom(searchId);
+        const errMsg = resData?.message || `Room with ID "${searchId}" not found.`;
+        setErrorMsg(errMsg);
       }
-    } catch {
-      findLocalRoom(searchId);
+    } catch (err) {
+      console.warn("Search Room Error:", err);
+      const errMsg =
+        err.response?.data?.message ||
+        err.response?.data?.detail ||
+        (err.response?.status === 404 ? `Room with ID "${searchId}" not found.` : "Failed to fetch room details.");
+      setErrorMsg(errMsg);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const findLocalRoom = (query) => {
-    const found = rooms.find(
-      (r) => String(r.id) === String(query) || String(r.roomNo) === String(query)
-    );
-    if (found) {
-      setRoomDetails(found);
-      setErrorMsg("");
-    } else {
-      setRoomDetails(null);
-      setErrorMsg("Room not found");
     }
   };
 
@@ -139,3 +136,4 @@ function GetRoomById({ rooms }) {
 }
 
 export default GetRoomById;
+
