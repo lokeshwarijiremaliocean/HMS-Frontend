@@ -8,9 +8,9 @@ import {
 
 function BedTabs({ activeTab = "all", setActiveTab }) {
   const tabs = [
-    { id: "all", label: "All Beds", icon: <MdFormatListBulleted /> },
-    { id: "add", label: "+ Add Bed", icon: <MdAdd /> },
-    { id: "get", label: "Get Bed by ID", icon: <MdSearch /> },
+    { id: "all", label: "Manage Beds", icon: <MdFormatListBulleted /> },
+    { id: "add", label: "Add Bed", icon: <MdAdd /> },
+    { id: "get", label: "Search Bed", icon: <MdSearch /> },
     { id: "update", label: "Update Bed", icon: <MdEdit /> },
     { id: "delete", label: "Delete Bed", icon: <MdDeleteOutline /> },
   ];

@@ -1,22 +1,33 @@
 import apiClient from "./axiosInstance";
 
-// Add new hostel
-export const addHostel = async (hostelData) => {
-  return apiClient.post("/hostel", hostelData);
+// ─── 1. ADD HOSTEL ───
+// Method: POST, Endpoint: /hostel/add
+export const addHostel = async (payload) => {
+  return apiClient.post("/hostel/add", payload);
 };
 
-// Search hostel by code
-export const searchHostel = async (code) => {
-  return apiClient.get(`/hostel?code=${encodeURIComponent(code)}`);
+// ─── 2. SEARCH HOSTEL BY CODE ───
+// Method: GET, Endpoint: /hostel/{hostel_code}
+export const getHostelByCode = async (hostelCode) => {
+  return apiClient.get(`/hostel/${encodeURIComponent(hostelCode)}`);
 };
 
-// Delete hostel by code or id
-export const deleteHostel = async (codeOrId) => {
-  return apiClient.delete(`/hostel?code=${encodeURIComponent(codeOrId)}`);
+// Alias for searchHostel
+export const searchHostel = getHostelByCode;
+
+// ─── 3. DELETE HOSTEL BY ID ───
+// Method: DELETE, Endpoint: /hostel/{id}
+export const deleteHostelById = async (id) => {
+  return apiClient.delete(`/hostel/${encodeURIComponent(id)}`);
 };
+
+// Alias for deleteHostel
+export const deleteHostel = deleteHostelById;
 
 export default {
   addHostel,
+  getHostelByCode,
   searchHostel,
+  deleteHostelById,
   deleteHostel,
 };

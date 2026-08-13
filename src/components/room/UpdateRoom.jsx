@@ -1,12 +1,20 @@
 import { useState, useEffect } from "react";
 import { MdEdit, MdRefresh, MdSave } from "react-icons/md";
 import { getRoomById, updateRoom } from "../../api/roomApi";
+import { getAllFloors } from "../../api/floorApi";
 
-function UpdateRoom({ rooms, initialRoomId, onRoomUpdated }) {
+function UpdateRoom({ rooms = [], initialRoomId, onRoomUpdated }) {
   const [searchId, setSearchId] = useState(initialRoomId || "");
   const [fetched, setFetched] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
+
+  const [floorsList, setFloorsList] = useState(() =>
+    Array.from({ length: 10 }, (_, i) => ({
+      floor_id: i + 1,
+      display_name: `F${i + 1}`,
+    }))
+  );
 
   const [formData, setFormData] = useState({
     floor: "",
@@ -14,9 +22,41 @@ function UpdateRoom({ rooms, initialRoomId, onRoomUpdated }) {
     totalBeds: "",
   });
 
+  useEffect(() => {
+    const fetchFloors = async () => {
+      try {
+        const res = await getAllFloors();
+        let dbFloors = [];
+        if (res) {
+          if (Array.isArray(res)) {
+            dbFloors = res;
+          } else if (Array.isArray(res.data)) {
+            dbFloors = res.data;
+          } else if (res.data?.data && Array.isArray(res.data.data)) {
+            dbFloors = res.data.data;
+          }
+        }
+        if (Array.isArray(dbFloors) && dbFloors.length > 0) {
+          const mapped = dbFloors.map((f) => {
+            const realId = Number(f.id ?? f.floor_id ?? f.floor_no);
+            const name = f.floor_name || `Floor ${f.floor_no || realId}`;
+            return {
+              floor_id: realId,
+              display_name: `${name} (ID: ${realId})`,
+            };
+          });
+          setFloorsList(mapped);
+        }
+      } catch (err) {
+        console.warn("Notice loading floors for update room form:", err.message);
+      }
+    };
+    fetchFloors();
+  }, []);
+
   const handleFetch = async (e, customId) => {
     if (e) e.preventDefault();
-    const idToUse = customId || searchId;
+    const idToUse = (customId || searchId || "").toString().trim();
     if (!idToUse) return;
 
     setLoading(true);
@@ -24,10 +64,12 @@ function UpdateRoom({ rooms, initialRoomId, onRoomUpdated }) {
 
     try {
       const res = await getRoomById(idToUse);
-      if (res.data && (res.data.data || res.data.room_no)) {
-        const item = res.data.data || res.data;
+      const resData = res.data;
+
+      if (resData && resData.success !== false && (resData.data || resData.room_no || resData.id)) {
+        const item = resData.data || resData;
         setFormData({
-          floor: item.floor_name || item.floor || `Floor ${item.floor_id || 1}`,
+          floor: String(item.floor_id || item.floor_no || item.floor || "1"),
           roomNo: String(item.room_no || item.roomNo || ""),
           totalBeds: String(item.total_beds || item.totalBeds || ""),
         });
@@ -42,7 +84,6 @@ function UpdateRoom({ rooms, initialRoomId, onRoomUpdated }) {
     }
   };
 
-  // Automatically fetch if initialRoomId passed from table edit action
   useEffect(() => {
     if (initialRoomId) {
       setSearchId(initialRoomId);
@@ -56,15 +97,15 @@ function UpdateRoom({ rooms, initialRoomId, onRoomUpdated }) {
     );
     if (found) {
       setFormData({
-        floor: found.floor,
-        roomNo: String(found.roomNo),
-        totalBeds: String(found.totalBeds),
+        floor: String(found.floor_id || found.floorNo || "1"),
+        roomNo: String(found.roomNo || ""),
+        totalBeds: String(found.totalBeds || ""),
       });
       setFetched(true);
       setMessage({ type: "", text: "" });
     } else {
       setFetched(false);
-      setMessage({ type: "error", text: "Room not found with provided ID" });
+      setMessage({ type: "error", text: `Room not found with ID "${id}"` });
     }
   };
 
@@ -88,32 +129,42 @@ function UpdateRoom({ rooms, initialRoomId, onRoomUpdated }) {
       return;
     }
 
+    const bedsNum = Number(formData.totalBeds);
+    if (isNaN(bedsNum) || bedsNum <= 0) {
+      setMessage({ type: "error", text: "Total beds must be a positive number." });
+      return;
+    }
+
     setLoading(true);
     setMessage({ type: "", text: "" });
 
     try {
-      const floorId = parseInt(formData.floor.replace(/\D/g, "") || "1", 10);
       const payload = {
-        floor_id: floorId,
-        room_no: formData.roomNo,
-        total_beds: parseInt(formData.totalBeds, 10),
+        floor_id: Number(formData.floor),
+        room_no: String(formData.roomNo).trim(),
+        total_beds: bedsNum,
       };
 
       const res = await updateRoom(searchId, payload);
-      if (res.data && (res.data.success || res.data.message)) {
-        setMessage({ type: "success", text: res.data.message || "Room updated successfully" });
+      if (res.data && res.data.success === false) {
+        setMessage({ type: "error", text: res.data.message || "Failed to update room" });
       } else {
-        setMessage({ type: "success", text: "Room updated successfully" });
-      }
-
-      if (onRoomUpdated) {
-        onRoomUpdated();
+        setMessage({ type: "success", text: res.data?.message || "Room updated successfully" });
+        if (onRoomUpdated) {
+          onRoomUpdated();
+        }
       }
     } catch (err) {
       console.warn("Update Room Error:", err);
+      const errMsg =
+        err.response?.data?.message ||
+        (Array.isArray(err.response?.data?.detail)
+          ? err.response.data.detail[0]?.msg
+          : err.response?.data?.detail) ||
+        "Failed to update room. Please check backend connection.";
       setMessage({
         type: "error",
-        text: err.response?.data?.message || err.response?.data?.detail || "Failed to update room. Please check backend connection.",
+        text: errMsg,
       });
     } finally {
       setLoading(false);
@@ -175,11 +226,11 @@ function UpdateRoom({ rooms, initialRoomId, onRoomUpdated }) {
             disabled={!fetched}
           >
             <option value="">Select Floor</option>
-            <option value="Floor 1">Floor 1</option>
-            <option value="Floor 2">Floor 2</option>
-            <option value="Floor 3">Floor 3</option>
-            <option value="Floor 4">Floor 4</option>
-            <option value="Floor 5">Floor 5</option>
+            {floorsList.map((f) => (
+              <option key={f.floor_id} value={f.floor_id}>
+                {f.display_name}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -236,3 +287,4 @@ function UpdateRoom({ rooms, initialRoomId, onRoomUpdated }) {
 }
 
 export default UpdateRoom;
+
