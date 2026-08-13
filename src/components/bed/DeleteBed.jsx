@@ -27,8 +27,18 @@ function DeleteBed({ initialBedId = null, onBedDeleted, showToast }) {
     setLoading(true);
     try {
       const res = await deleteBed(bedId);
+
+      if (res.data && res.data.success === false) {
+        if (showToast) {
+          showToast("error", res.data.message || "Failed to delete bed");
+        }
+        setIsModalOpen(false);
+        return;
+      }
+
       const isSuccess =
         res.status === 200 ||
+        res.status === 204 ||
         res.data?.success;
 
       if (isSuccess) {
@@ -44,16 +54,27 @@ function DeleteBed({ initialBedId = null, onBedDeleted, showToast }) {
         if (showToast) {
           showToast("error", res.data?.message || "Failed to delete bed");
         }
+        setIsModalOpen(false);
       }
     } catch (err) {
       console.error("Delete Bed Error:", err);
-      const msg =
-        err.response?.data?.detail ||
-        err.response?.data?.message ||
-        "Failed to delete bed";
+      let msg = "Failed to delete bed";
+      if (err.response?.data) {
+        const d = err.response.data;
+        if (typeof d.message === "string" && d.message.trim()) {
+          msg = d.message;
+        } else if (typeof d.detail === "string" && d.detail.trim()) {
+          msg = d.detail;
+        } else if (Array.isArray(d.detail) && d.detail.length > 0) {
+          msg = d.detail.map((item) => item.msg || item.message || JSON.stringify(item)).join(", ");
+        }
+      } else if (err.message) {
+        msg = err.message;
+      }
       if (showToast) {
         showToast("error", msg);
       }
+      setIsModalOpen(false);
     } finally {
       setLoading(false);
     }
