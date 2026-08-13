@@ -13,4 +13,8 @@ export const verifyOTP = async (email, otp) => {
   });
 };
 
+export const registerAdmin = async (adminData) => {
+  return apiClient.post("/admin", adminData);
+};
+
 export default apiClient;
