@@ -6,6 +6,7 @@ import "../styles/auth.css";
 
 import LeftPanel from "../components/auth/LeftPanel";
 import SuccessPopup from "../components/common/SuccessPopup";
+import AlertPopup from "../components/common/AlertPopup";
 
 function OTPVerification() {
   const navigate = useNavigate();
@@ -16,6 +17,8 @@ function OTPVerification() {
   const [otp, setOtp] = useState(["", "", "", ""]);
   const [verifying, setVerifying] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
+  const [showAlertPopup, setShowAlertPopup] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
 
   const handleChange = (value, index) => {
     if (!/^[0-9]?$/.test(value)) {
@@ -39,7 +42,8 @@ function OTPVerification() {
     const finalOTP = otp.join("");
 
     if (finalOTP.length !== 4) {
-      alert("Enter 4 digit OTP");
+      setAlertMessage("Enter 4 digit OTP");
+      setShowAlertPopup(true);
       return;
     }
 
@@ -62,11 +66,17 @@ function OTPVerification() {
         }
         setShowPopup(true);
       } else {
-        alert(response.data.message || "Invalid OTP");
+        setAlertMessage(response.data.message || "Invalid OTP");
+        setShowAlertPopup(true);
       }
     } catch (error) {
       console.log(error);
-      alert("Something went wrong. Please try again.");
+      const errorMsg =
+        error.response?.data?.detail ||
+        error.response?.data?.message ||
+        "Something went wrong. Please try again.";
+      setAlertMessage(errorMsg);
+      setShowAlertPopup(true);
     } finally {
       setVerifying(false);
     }
@@ -74,7 +84,7 @@ function OTPVerification() {
 
   const handlePopupConfirm = () => {
     setShowPopup(false);
-    navigate("/register");
+    navigate("/dashboard");
   };
 
   return (
@@ -119,6 +129,13 @@ function OTPVerification() {
         title="OTP Verified Successfully"
         message="Your OTP has been verified successfully."
         onConfirm={handlePopupConfirm}
+      />
+
+      <AlertPopup
+        isOpen={showAlertPopup}
+        title="Attention"
+        message={alertMessage}
+        onConfirm={() => setShowAlertPopup(false)}
       />
     </div>
   );

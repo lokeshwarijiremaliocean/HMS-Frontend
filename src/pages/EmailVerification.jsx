@@ -7,6 +7,7 @@ import LeftPanel from "../components/auth/LeftPanel";
 import InputField from "../components/auth/InputField";
 import Button from "../components/auth/Button";
 import SuccessPopup from "../components/common/SuccessPopup";
+import AlertPopup from "../components/common/AlertPopup";
 
 import { sendOTP } from "../api/authapi";
 
@@ -16,10 +17,13 @@ function EmailVerification() {
   const [email, setEmail] = useState("");
   const [sending, setSending] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
+  const [showAlertPopup, setShowAlertPopup] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
 
   const handleContinue = async () => {
     if (!email) {
-      alert("Please enter your email.");
+      setAlertMessage("Please enter your email.");
+      setShowAlertPopup(true);
       return;
     }
     if (sending) return;
@@ -41,7 +45,8 @@ function EmailVerification() {
           ? `Cannot connect to backend server (${import.meta.env.VITE_API_URL || "http://127.0.0.1:8000"}). Please check if your backend server is running.`
           : "Failed to send OTP. Please try again.");
 
-      alert(errorMessage);
+      setAlertMessage(errorMessage);
+      setShowAlertPopup(true);
     } finally {
       setSending(false);
     }
@@ -82,6 +87,13 @@ function EmailVerification() {
         title="OTP Sent Successfully!"
         message="Your OTP has been sent successfully."
         onConfirm={handlePopupConfirm}
+      />
+
+      <AlertPopup
+        isOpen={showAlertPopup}
+        title="Attention"
+        message={alertMessage}
+        onConfirm={() => setShowAlertPopup(false)}
       />
     </div>
   );
