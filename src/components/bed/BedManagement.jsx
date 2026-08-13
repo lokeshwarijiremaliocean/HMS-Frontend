@@ -32,28 +32,32 @@ function BedManagement() {
     setToast(null);
   }, []);
 
-  // Fetch all beds from backend API
+  // Fetch all beds from backend API (GET /bed)
   const fetchAllBeds = useCallback(async () => {
     setLoading(true);
     try {
       const res = await getAllBeds();
+      let bedList = [];
       if (res && res.data) {
-        const list = res.data.data || res.data;
-        if (Array.isArray(list)) {
-          setBeds(list);
-        } else {
-          setBeds([]);
+        if (Array.isArray(res.data.data)) {
+          bedList = res.data.data;
+        } else if (Array.isArray(res.data)) {
+          bedList = res.data;
+        } else if (res.data.data && typeof res.data.data === "object") {
+          bedList = Object.values(res.data.data);
         }
-      } else {
-        setBeds([]);
       }
+      setBeds(Array.isArray(bedList) ? bedList : []);
     } catch (err) {
-      console.warn("Backend beds fetch notice (empty initial state):", err.message);
+      console.error("Backend beds fetch error:", err);
       setBeds([]);
+      if (err.response?.status === 401) {
+        showToast("error", "Unauthorized access. Please log in again.");
+      }
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [showToast]);
 
   useEffect(() => {
     fetchAllBeds();

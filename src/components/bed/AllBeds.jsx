@@ -121,7 +121,13 @@ function AllBeds({
               </tr>
             ) : paginatedBeds.length > 0 ? (
               paginatedBeds.map((bed, index) => {
-                const bedId = bed.id || bed.bed_id || index + 1;
+                const actualBedId =
+                  bed.id !== undefined && bed.id !== null
+                    ? bed.id
+                    : bed.bed_id !== undefined && bed.bed_id !== null
+                    ? bed.bed_id
+                    : null;
+                const displayId = actualBedId !== null ? actualBedId : index + 1;
                 const hostelDisplay =
                   bed.hostel_name || (bed.hostel_id ? `Hostel ${bed.hostel_id}` : "-");
                 const floorDisplay =
@@ -138,10 +144,10 @@ function AllBeds({
                 const statusLabel = isOccupied ? "Occupied" : "Available";
 
                 return (
-                  <tr key={bedId}>
+                  <tr key={actualBedId || index}>
                     <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
                     <td>
-                      <strong style={{ color: "#0f172a" }}>#{bedId}</strong>
+                      <strong style={{ color: "#0f172a" }}>#{displayId}</strong>
                     </td>
                     <td>{hostelDisplay}</td>
                     <td>{floorDisplay}</td>
@@ -164,7 +170,7 @@ function AllBeds({
                           type="button"
                           className="bm-action-icon view"
                           title="View Details"
-                          onClick={() => onSelectView && onSelectView(bedId)}
+                          onClick={() => onSelectView && onSelectView(actualBedId)}
                         >
                           <MdVisibility />
                         </button>
@@ -172,7 +178,7 @@ function AllBeds({
                           type="button"
                           className="bm-action-icon edit"
                           title="Edit Bed"
-                          onClick={() => onSelectEdit && onSelectEdit(bedId)}
+                          onClick={() => onSelectEdit && onSelectEdit(actualBedId)}
                         >
                           <MdEdit />
                         </button>
@@ -180,7 +186,7 @@ function AllBeds({
                           type="button"
                           className="bm-action-icon delete"
                           title="Delete Bed"
-                          onClick={() => onSelectDelete && onSelectDelete(bedId)}
+                          onClick={() => onSelectDelete && onSelectDelete(actualBedId)}
                         >
                           <MdDeleteOutline />
                         </button>

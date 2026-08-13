@@ -15,6 +15,7 @@ import {
   MdBed,
   MdApartment,
   MdLayers,
+  MdAdd,
   MdAssessment,
   MdLogout,
   MdKeyboardArrowDown,
@@ -26,6 +27,8 @@ function Sidebar({
   activePage = "dashboard",
   activeStudentTab = "all",
   onSelectStudentTab,
+  activeFloorTab = "view",
+  onSelectFloorTab,
 }) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -35,6 +38,13 @@ function Sidebar({
       onSelectStudentTab(tab);
     }
     navigate("/student-management", { state: { tab } });
+  };
+
+  const handleFloorTabClick = (tab) => {
+    if (onSelectFloorTab) {
+      onSelectFloorTab(tab);
+    }
+    navigate("/floor", { state: { tab } });
   };
 
   const handleLogout = () => {
@@ -121,19 +131,39 @@ function Sidebar({
           <span>Allocate Bed</span>
         </div>
 
-        <div className="menu-item">
-          <MdApartment />
-          <span>Floor Search</span>
-        </div>
-
         <h4>
           FLOOR MANAGEMENT
           <MdKeyboardArrowDown className="arrow" />
         </h4>
 
-        <div className="menu-item">
+        <div
+          className={`menu-item ${
+            (activePage === "floorManagement" && (activeFloorTab === "view" || activeFloorTab === "all")) ||
+            location.pathname === "/floor" ||
+            location.pathname === "/floors"
+              ? "active"
+              : ""
+          }`}
+          onClick={() => handleFloorTabClick("view")}
+        >
           <MdLayers />
           <span>View Floors</span>
+        </div>
+
+        <div
+          className={`menu-item ${activePage === "floorManagement" && activeFloorTab === "search" ? "active" : ""}`}
+          onClick={() => handleFloorTabClick("search")}
+        >
+          <MdSearch />
+          <span>Search Floors</span>
+        </div>
+
+        <div
+          className={`menu-item ${activePage === "floorManagement" && activeFloorTab === "add" ? "active" : ""}`}
+          onClick={() => handleFloorTabClick("add")}
+        >
+          <MdAdd />
+          <span>Add Floor</span>
         </div>
 
         <h4>

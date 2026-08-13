@@ -1,10 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { MdEdit, MdRefresh, MdSave, MdSearch } from "react-icons/md";
 import {
   getBedById,
   updateBed,
   getHostelsList,
   getFloorsList,
+  ROOMS_LIST,
+  BEDS_LIST,
 } from "../../api/bedApi";
 
 function UpdateBed({
@@ -35,18 +37,28 @@ function UpdateBed({
   useEffect(() => {
     const fetchOptions = async () => {
       try {
-        const [hostelData, floorData] = await Promise.all([
-          getHostelsList(),
-          getFloorsList(),
-        ]);
-        if (Array.isArray(hostelData)) setHostels(hostelData);
-        if (Array.isArray(floorData)) setFloors(floorData);
+        const floorData = await getFloorsList();
+        const activeFloors = Array.isArray(floorData) ? floorData : [];
+        setFloors(activeFloors);
+
+        const hostelData = await getHostelsList();
+        if (Array.isArray(hostelData) && hostelData.length > 0) {
+          setHostels(hostelData);
+        }
       } catch (err) {
-        console.warn("Dropdown options load notice:", err.message);
+        console.error("Dropdown options load notice:", err);
       }
     };
     fetchOptions();
   }, []);
+
+  // Filter floors belonging ONLY to the selected hostel
+  const availableFloors = useMemo(() => {
+    if (!formData.hostel_id) return [];
+    return floors.filter(
+      (f) => String(f.hostel_id) === String(formData.hostel_id)
+    );
+  }, [floors, formData.hostel_id]);
 
   // Fetch bed details
   const handleFetchBed = async (idToFetch) => {
@@ -61,27 +73,49 @@ function UpdateBed({
 
     try {
       const res = await getBedById(targetId);
+
+      if (res.data && res.data.success === false) {
+        const msg = res.data.message || "Bed not found";
+        setErrorMessage(msg);
+        setActiveBedId(null);
+        if (showToast) showToast("error", msg);
+        return;
+      }
+
       const data = res.data?.data || res.data;
 
-      if (data && (data.id || data.bed_id || data.room_no || data.bed_no)) {
+      if (data && typeof data === "object" && (data.id || data.bed_id || data.room_no || data.bed_no)) {
         setActiveBedId(data.id || data.bed_id || targetId);
         setFormData({
-          hostel_id: data.hostel_id !== undefined ? data.hostel_id : "",
-          floor_id: data.floor_id !== undefined ? data.floor_id : "",
+          hostel_id: data.hostel_id !== undefined && data.hostel_id !== null ? Number(data.hostel_id) : 1,
+          floor_id: data.floor_id !== undefined && data.floor_id !== null ? Number(data.floor_id) : "",
           floor_name: data.floor_name || "",
           room_no: data.room_no || data.room_number || "",
           bed_no: data.bed_no || data.bed_number || "",
         });
         setFormErrors({});
-        if (showToast) showToast("success", "Bed details loaded for editing.");
+        if (showToast) showToast("success", res.data?.message || "Bed details loaded for editing.");
       } else {
-        setErrorMessage("Bed not found");
+        const msg = res.data?.message || "Bed not found";
+        setErrorMessage(msg);
         setActiveBedId(null);
-        if (showToast) showToast("error", "Bed not found");
+        if (showToast) showToast("error", msg);
       }
     } catch (err) {
-      console.error("Fetch Bed Error:", err);
-      const msg = err.response?.data?.message || err.response?.data?.detail || "Bed not found";
+      console.error("Fetch Bed API Error:", err.response?.data || err);
+      let msg = "Bed not found";
+      if (err.response?.data) {
+        const d = err.response.data;
+        if (typeof d.message === "string" && d.message.trim()) {
+          msg = d.message;
+        } else if (typeof d.detail === "string" && d.detail.trim()) {
+          msg = d.detail;
+        } else if (Array.isArray(d.detail) && d.detail.length > 0) {
+          errMsg = d.detail.map((item) => item.msg || item.message || JSON.stringify(item)).join(", ");
+        }
+      } else if (err.message) {
+        msg = err.message;
+      }
       setErrorMessage(msg);
       setActiveBedId(null);
       if (showToast) showToast("error", msg);
@@ -102,16 +136,47 @@ function UpdateBed({
     setFormData((prev) => {
       const updated = { ...prev, [name]: value };
 
+      // 1. When Hostel changes:
+      // Reset Floor, Room, Bed
+      if (name === "hostel_id") {
+        updated.hostel_id = value ? Number(value) : "";
+        updated.floor_id = "";
+        updated.floor_name = "";
+        updated.room_no = "";
+        updated.bed_no = "";
+      }
+
+      // 2. When Floor changes:
+      // Reset Room, Bed
       if (name === "floor_id") {
-        const selectedFloor = floors.find(
-          (f) => String(f.id || f.floor_id) === String(value)
+        const selectedFloor = availableFloors.find(
+          (f) => String(f.id ?? f.floor_id) === String(value)
         );
         if (selectedFloor) {
-          updated.floor_name =
-            selectedFloor.name ||
+          updated.floor_id = Number(selectedFloor.id ?? selectedFloor.floor_id);
+          updated.floor_name = String(
             selectedFloor.floor_name ||
-            `Floor ${selectedFloor.floor_number || value}`;
+            selectedFloor.name ||
+            `Floor ${selectedFloor.floor_no || selectedFloor.id}`
+          );
+        } else {
+          updated.floor_id = "";
+          updated.floor_name = "";
         }
+        updated.room_no = "";
+        updated.bed_no = "";
+      }
+
+      // 3. When Room changes:
+      // Reset Bed
+      if (name === "room_no") {
+        updated.room_no = value;
+        updated.bed_no = "";
+      }
+
+      // 4. When Bed changes:
+      if (name === "bed_no") {
+        updated.bed_no = value;
       }
 
       return updated;
@@ -125,19 +190,16 @@ function UpdateBed({
   const validate = () => {
     const errors = {};
     if (!formData.hostel_id && formData.hostel_id !== 0) {
-      errors.hostel_id = "Hostel is required";
+      errors.hostel_id = "Please select a hostel";
     }
     if (!formData.floor_id && formData.floor_id !== 0) {
-      errors.floor_id = "Floor is required";
+      errors.floor_id = "Please select a floor";
     }
-    if (!formData.floor_name.trim()) {
-      errors.floor_name = "Floor Name is required";
+    if (!formData.room_no) {
+      errors.room_no = "Please select a room";
     }
-    if (!formData.room_no.trim()) {
-      errors.room_no = "Room Number is required";
-    }
-    if (!formData.bed_no.trim()) {
-      errors.bed_no = "Bed Number is required";
+    if (!formData.bed_no) {
+      errors.bed_no = "Please select a bed";
     }
     return errors;
   };
@@ -158,7 +220,23 @@ function UpdateBed({
 
     setSaving(true);
     try {
-      const res = await updateBed(activeBedId, formData);
+      const payload = {
+        hostel_id: Number(formData.hostel_id),
+        floor_id: Number(formData.floor_id),
+        floor_name: String(formData.floor_name),
+        room_no: String(formData.room_no).trim(),
+        bed_no: String(formData.bed_no).trim(),
+      };
+
+      const res = await updateBed(activeBedId, payload);
+
+      if (res.data && res.data.success === false) {
+        if (showToast) {
+          showToast("error", res.data.message || "Failed to update bed");
+        }
+        return;
+      }
+
       const isSuccess =
         res.status === 200 ||
         res.data?.success ||
@@ -169,7 +247,7 @@ function UpdateBed({
           showToast("success", res.data?.message || "Bed updated successfully");
         }
         if (onBedUpdated) {
-          onBedUpdated(activeBedId, res.data?.data || res.data || formData);
+          onBedUpdated(activeBedId, res.data?.data || res.data || payload);
         }
       } else {
         if (showToast) {
@@ -177,11 +255,20 @@ function UpdateBed({
         }
       }
     } catch (err) {
-      console.error("Update Bed Error:", err);
-      const errMsg =
-        err.response?.data?.detail ||
-        err.response?.data?.message ||
-        "Failed to update bed";
+      console.error("Update Bed API Error:", err.response?.data || err);
+      let errMsg = "Failed to update bed";
+      if (err.response?.data) {
+        const d = err.response.data;
+        if (typeof d.message === "string" && d.message.trim()) {
+          errMsg = d.message;
+        } else if (typeof d.detail === "string" && d.detail.trim()) {
+          errMsg = d.detail;
+        } else if (Array.isArray(d.detail) && d.detail.length > 0) {
+          errMsg = d.detail.map((item) => item.msg || item.message || JSON.stringify(item)).join(", ");
+        }
+      } else if (err.message) {
+        errMsg = err.message;
+      }
       if (showToast) {
         showToast("error", errMsg);
       }
@@ -265,7 +352,7 @@ function UpdateBed({
           </div>
 
           <div className="bm-form-grid">
-            {/* 1. Hostel */}
+            {/* 1. Hostel Dropdown */}
             <div className="bm-field-group">
               <label htmlFor="up_hostel_id">
                 Hostel <span>*</span>
@@ -278,18 +365,15 @@ function UpdateBed({
                 disabled={saving}
               >
                 <option value="">Select Hostel</option>
-                {hostels.length > 0 ? (
-                  hostels.map((h, i) => (
-                    <option key={h.id || i} value={h.id || i + 1}>
-                      {h.name || h.hostel_name || `Hostel ${h.id || i + 1}`}
+                {hostels.map((h) => {
+                  const hId = h.id !== undefined && h.id !== null ? h.id : h.hostel_id || 1;
+                  const hLabel = h.name || h.hostel_name || "Campus Next";
+                  return (
+                    <option key={hId} value={hId}>
+                      {hLabel}
                     </option>
-                  ))
-                ) : (
-                  <>
-                    <option value="1">Hostel 1 (Main Campus)</option>
-                    <option value="2">Hostel 2 (North Block)</option>
-                  </>
-                )}
+                  );
+                })}
               </select>
               {formErrors.hostel_id && (
                 <span style={{ color: "#dc2626", fontSize: "12px", marginTop: "4px" }}>
@@ -298,7 +382,7 @@ function UpdateBed({
               )}
             </div>
 
-            {/* 2. Floor */}
+            {/* 2. Floor Dropdown (Dynamic from Floor API filtered by selected hostel) */}
             <div className="bm-field-group">
               <label htmlFor="up_floor_id">
                 Floor <span>*</span>
@@ -308,24 +392,18 @@ function UpdateBed({
                 name="floor_id"
                 value={formData.floor_id}
                 onChange={handleChange}
-                disabled={saving}
+                disabled={!formData.hostel_id || saving}
               >
                 <option value="">Select Floor</option>
-                {floors.length > 0 ? (
-                  floors.map((f, i) => (
-                    <option key={f.id || f.floor_id || i} value={f.id || f.floor_id || i + 1}>
-                      {f.name || f.floor_name || `Floor ${f.floor_number || f.floor_id || i + 1}`}
+                {availableFloors.map((f) => {
+                  const fId = f.id !== undefined && f.id !== null ? f.id : f.floor_id;
+                  const fLabel = f.floor_name || f.name || `Floor ${f.floor_no || fId}`;
+                  return (
+                    <option key={fId} value={fId}>
+                      {fLabel}
                     </option>
-                  ))
-                ) : (
-                  <>
-                    <option value="1">Floor 1</option>
-                    <option value="2">Floor 2</option>
-                    <option value="3">Floor 3</option>
-                    <option value="4">Floor 4</option>
-                    <option value="5">Floor 5</option>
-                  </>
-                )}
+                  );
+                })}
               </select>
               {formErrors.floor_id && (
                 <span style={{ color: "#dc2626", fontSize: "12px", marginTop: "4px" }}>
@@ -334,41 +412,25 @@ function UpdateBed({
               )}
             </div>
 
-            {/* 3. Floor Name */}
-            <div className="bm-field-group full-width">
-              <label htmlFor="up_floor_name">
-                Floor Name <span>*</span>
-              </label>
-              <input
-                type="text"
-                id="up_floor_name"
-                name="floor_name"
-                placeholder="Enter floor name"
-                value={formData.floor_name}
-                onChange={handleChange}
-                disabled={saving}
-              />
-              {formErrors.floor_name && (
-                <span style={{ color: "#dc2626", fontSize: "12px", marginTop: "4px" }}>
-                  {formErrors.floor_name}
-                </span>
-              )}
-            </div>
-
-            {/* 4. Room No. */}
+            {/* 3. Room No. Dropdown (Disabled until Floor is selected) */}
             <div className="bm-field-group">
               <label htmlFor="up_room_no">
                 Room No. <span>*</span>
               </label>
-              <input
-                type="text"
+              <select
                 id="up_room_no"
                 name="room_no"
-                placeholder="Enter room number"
                 value={formData.room_no}
                 onChange={handleChange}
-                disabled={saving}
-              />
+                disabled={!formData.floor_id || saving}
+              >
+                <option value="">Select Room</option>
+                {ROOMS_LIST.map((r) => (
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
+                ))}
+              </select>
               {formErrors.room_no && (
                 <span style={{ color: "#dc2626", fontSize: "12px", marginTop: "4px" }}>
                   {formErrors.room_no}
@@ -376,20 +438,25 @@ function UpdateBed({
               )}
             </div>
 
-            {/* 5. Bed No. */}
+            {/* 4. Bed No. Dropdown (Disabled until Room is selected) */}
             <div className="bm-field-group">
               <label htmlFor="up_bed_no">
                 Bed No. <span>*</span>
               </label>
-              <input
-                type="text"
+              <select
                 id="up_bed_no"
                 name="bed_no"
-                placeholder="Enter bed number"
                 value={formData.bed_no}
                 onChange={handleChange}
-                disabled={saving}
-              />
+                disabled={!formData.room_no || saving}
+              >
+                <option value="">Select Bed</option>
+                {BEDS_LIST.map((b) => (
+                  <option key={b} value={b}>
+                    {b}
+                  </option>
+                ))}
+              </select>
               {formErrors.bed_no && (
                 <span style={{ color: "#dc2626", fontSize: "12px", marginTop: "4px" }}>
                   {formErrors.bed_no}
@@ -435,3 +502,5 @@ function UpdateBed({
 }
 
 export default UpdateBed;
+
+
