@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { MdDelete, MdWarning, MdInfoOutline, MdClose } from "react-icons/md";
 import { deleteRoom } from "../../api/roomApi";
+import { getApiErrorMessage } from "../../api/axiosInstance";
 
 function DeleteRoom({ initialRoomId, onRoomDeleted }) {
   const [deleteId, setDeleteId] = useState(initialRoomId || "");
@@ -45,7 +46,7 @@ function DeleteRoom({ initialRoomId, onRoomDeleted }) {
       console.warn("Delete Room Error:", err);
       setMessage({
         type: "error",
-        text: err.response?.data?.message || err.response?.data?.detail || "Failed to delete room. Please check backend connection.",
+        text: getApiErrorMessage(err, "Failed to delete room."),
       });
     } finally {
       setLoading(false);

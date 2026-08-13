@@ -7,33 +7,41 @@ export const getAllFloors = async () => {
 };
 
 // ─── 2. GET FLOOR BY ID ───
-// Method: GET, Endpoint: /floor/{id}
+// Method: GET, Endpoint: /floor/id?id={id}
 export const getFloorById = async (id) => {
-  return await apiClient.get(`/floor/${encodeURIComponent(id)}`);
+  const numericId = parseInt(id, 10);
+  const targetId = isNaN(numericId) ? id : numericId;
+  return await apiClient.get(`/floor/id?id=${encodeURIComponent(targetId)}`);
 };
 
 // ─── 3. GET FLOOR BY NAME ───
-// Method: GET, Endpoint: /floor?floor_name={floor_name}
+// Method: GET, Endpoint: /floor/name?floor_name={floor_name}
 export const getFloorByName = async (floorName) => {
-  return await apiClient.get(`/floor?floor_name=${encodeURIComponent(floorName)}`);
+  return await apiClient.get(`/floor/name?floor_name=${encodeURIComponent(floorName)}`);
 };
 
 // ─── 4. ADD NEW FLOOR ───
-// Method: POST, Endpoint: /floor
+// Method: POST, Endpoint: /floor/add
+// Body: { hostel_id: number, floor_no: number, floor_name: string }
 export const addFloor = async (floorData) => {
-  return await apiClient.post("/floor", floorData);
+  return await apiClient.post("/floor/add", floorData);
 };
 
 // ─── 5. UPDATE FLOOR BY ID ───
-// Method: PUT, Endpoint: /floor/{id}
+// Method: PUT, Endpoint: /floor/id?id={id}
+// Body: { hostel_id?: number, floor_no?: number, floor_name?: string }
 export const updateFloor = async (id, floorData) => {
-  return await apiClient.put(`/floor/${encodeURIComponent(id)}`, floorData);
+  const numericId = parseInt(id, 10);
+  const targetId = isNaN(numericId) ? id : numericId;
+  return await apiClient.put(`/floor/id?id=${encodeURIComponent(targetId)}`, floorData);
 };
 
 // ─── 6. DELETE FLOOR BY ID ───
-// Method: DELETE, Endpoint: /floor/{id}
+// Method: DELETE, Endpoint: /floor/id?id={id}
 export const deleteFloor = async (id) => {
-  return await apiClient.delete(`/floor/${encodeURIComponent(id)}`);
+  const numericId = parseInt(id, 10);
+  const targetId = isNaN(numericId) ? id : numericId;
+  return await apiClient.delete(`/floor/id?id=${encodeURIComponent(targetId)}`);
 };
 
 export default {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import Sidebar from "../dashboard/Sidebar";
 import Navbar from "../dashboard/Navbar";
@@ -7,78 +7,13 @@ import FloorTabs from "./FloorTabs";
 import ViewFloors from "./ViewFloors";
 import SearchFloor from "./SearchFloor";
 import AddFloor from "./AddFloor";
+import UpdateFloor from "./UpdateFloor";
+import DeleteFloor from "./DeleteFloor";
 import FloorDetailsModal from "./FloorDetailsModal";
 
+import { getAllFloors } from "../../api/floorApi";
+import { getAuthToken, getApiErrorMessage } from "../../api/axiosInstance";
 import "../../styles/floorManagement.css";
-
-// Realistic frontend mock data strictly adhering to backend Floor entity fields
-// (id, hostel_id, floor_no, floor_name, is_active, created_by)
-const INITIAL_MOCK_FLOORS = [
-  {
-    id: 1,
-    hostel_id: 101,
-    floor_no: 0,
-    floor_name: "Ground Floor",
-    is_active: true,
-    created_by: "Admin",
-  },
-  {
-    id: 2,
-    hostel_id: 101,
-    floor_no: 1,
-    floor_name: "First Floor",
-    is_active: true,
-    created_by: "Admin",
-  },
-  {
-    id: 3,
-    hostel_id: 101,
-    floor_no: 2,
-    floor_name: "Second Floor",
-    is_active: true,
-    created_by: "Admin",
-  },
-  {
-    id: 4,
-    hostel_id: 101,
-    floor_no: 3,
-    floor_name: "Third Floor",
-    is_active: false,
-    created_by: "Admin",
-  },
-  {
-    id: 5,
-    hostel_id: 102,
-    floor_no: 1,
-    floor_name: "Block A - Floor 1",
-    is_active: true,
-    created_by: "SuperAdmin",
-  },
-  {
-    id: 6,
-    hostel_id: 102,
-    floor_no: 2,
-    floor_name: "Block A - Floor 2",
-    is_active: true,
-    created_by: "SuperAdmin",
-  },
-  {
-    id: 7,
-    hostel_id: 103,
-    floor_no: 1,
-    floor_name: "Wing B - Floor 1",
-    is_active: true,
-    created_by: "Hostel Admin",
-  },
-  {
-    id: 8,
-    hostel_id: 103,
-    floor_no: 2,
-    floor_name: "Wing B - Floor 2",
-    is_active: false,
-    created_by: "Hostel Admin",
-  },
-];
 
 function FloorManagement() {
   const location = useLocation();
@@ -86,15 +21,96 @@ function FloorManagement() {
 
   const [activeTab, setActiveTab] = useState(initialTab);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [floors, setFloors] = useState(INITIAL_MOCK_FLOORS);
+
+  // Backend state
+  const [floors, setFloors] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [fetchError, setFetchError] = useState("");
+
+  // Edit / Delete Floor state
+  const [editingFloorId, setEditingFloorId] = useState("");
+  const [deletingFloorId, setDeletingFloorId] = useState("");
+
+  // Details Modal state
   const [selectedFloor, setSelectedFloor] = useState(null);
+  const [modalEditMode, setModalEditMode] = useState(false);
+
+  // Fetch real floors from backend
+  const fetchFloors = useCallback(async () => {
+    const token = getAuthToken();
+    if (!token) {
+      setFetchError("No authentication token found. Please log in from the home screen to access floor management.");
+      setFloors([]);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setFetchError("");
+    try {
+      const response = await getAllFloors();
+      if (response.data && Array.isArray(response.data.data)) {
+        setFloors(response.data.data);
+      } else {
+        setFloors([]);
+      }
+    } catch (err) {
+      if (err.response && err.response.status === 404) {
+        // 404 with "No floors found." is normal when database has no floors yet
+        setFloors([]);
+      } else {
+        console.error("Error fetching floors:", err);
+        setFetchError(getApiErrorMessage(err, "Failed to load floor records."));
+        setFloors([]);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Initial load
+  useEffect(() => {
+    fetchFloors();
+  }, [fetchFloors]);
+
+  // Sync tab with location state if changed
+  useEffect(() => {
+    if (location.state?.tab) {
+      setActiveTab(location.state.tab);
+    }
+  }, [location.state?.tab]);
 
   const handleSelectView = (floor) => {
     setSelectedFloor(floor);
+    setModalEditMode(false);
   };
 
-  const handleFloorAdded = (newFloor) => {
-    setFloors((prev) => [newFloor, ...prev]);
+  const handleSelectEdit = (floor) => {
+    setEditingFloorId(floor.id);
+    setActiveTab("update");
+  };
+
+  const handleSelectDelete = (floor) => {
+    setDeletingFloorId(floor.id);
+    setActiveTab("delete");
+  };
+
+  const handleCloseModal = () => {
+    setSelectedFloor(null);
+    setModalEditMode(false);
+  };
+
+  const handleFloorAdded = async () => {
+    await fetchFloors();
+    setActiveTab("view");
+  };
+
+  const handleFloorUpdated = async () => {
+    await fetchFloors();
+  };
+
+  const handleFloorDeleted = async () => {
+    await fetchFloors();
   };
 
   return (
@@ -126,7 +142,12 @@ function FloorManagement() {
         {(activeTab === "view" || activeTab === "all") && (
           <ViewFloors
             floors={floors}
+            loading={loading}
+            errorMessage={fetchError}
             onSelectView={handleSelectView}
+            onSelectEdit={handleSelectEdit}
+            onSelectDelete={handleSelectDelete}
+            onRefresh={fetchFloors}
           />
         )}
 
@@ -142,13 +163,31 @@ function FloorManagement() {
             onFloorAdded={handleFloorAdded}
           />
         )}
+
+        {activeTab === "update" && (
+          <UpdateFloor
+            floors={floors}
+            initialFloorId={editingFloorId}
+            onFloorUpdated={handleFloorUpdated}
+          />
+        )}
+
+        {activeTab === "delete" && (
+          <DeleteFloor
+            floors={floors}
+            initialFloorId={deletingFloorId}
+            onFloorDeleted={handleFloorDeleted}
+          />
+        )}
       </main>
 
       {/* Floor Details Modal */}
       {selectedFloor && (
         <FloorDetailsModal
           floor={selectedFloor}
-          onClose={() => setSelectedFloor(null)}
+          initialEditMode={modalEditMode}
+          onClose={handleCloseModal}
+          onFloorUpdated={handleFloorUpdated}
         />
       )}
     </div>

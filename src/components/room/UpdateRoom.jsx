@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { MdEdit, MdRefresh, MdSave } from "react-icons/md";
 import { getRoomById, updateRoom } from "../../api/roomApi";
+import { getApiErrorMessage } from "../../api/axiosInstance";
 
 function UpdateRoom({ rooms, initialRoomId, onRoomUpdated }) {
   const [searchId, setSearchId] = useState(initialRoomId || "");
@@ -113,7 +114,7 @@ function UpdateRoom({ rooms, initialRoomId, onRoomUpdated }) {
       console.warn("Update Room Error:", err);
       setMessage({
         type: "error",
-        text: err.response?.data?.message || err.response?.data?.detail || "Failed to update room. Please check backend connection.",
+        text: getApiErrorMessage(err, "Failed to update room."),
       });
     } finally {
       setLoading(false);

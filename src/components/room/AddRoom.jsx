@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { MdAddCircleOutline, MdAdd, MdRefresh } from "react-icons/md";
 import { addRoom } from "../../api/roomApi";
+import { getApiErrorMessage } from "../../api/axiosInstance";
 
 function AddRoom({ onRoomAdded }) {
   const [formData, setFormData] = useState({
@@ -59,7 +60,7 @@ function AddRoom({ onRoomAdded }) {
       console.warn("Add Room Error:", err);
       setMessage({
         type: "error",
-        text: err.response?.data?.message || err.response?.data?.detail || "Failed to add room. Please check backend connection.",
+        text: getApiErrorMessage(err, "Failed to add room."),
       });
     } finally {
       setLoading(false);

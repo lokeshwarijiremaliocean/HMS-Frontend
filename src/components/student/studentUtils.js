@@ -53,6 +53,9 @@ export const extractErrorMessage = (err, fallbackMessage = "An error occurred") 
   const data = err.response?.data;
   if (data) {
     if (typeof data === "string" && data.trim()) return data;
+    if (data.error && typeof data.error.message === "string" && data.error.message.trim()) {
+      return data.error.message;
+    }
     if (typeof data.message === "string" && data.message.trim()) {
       return data.message;
     }

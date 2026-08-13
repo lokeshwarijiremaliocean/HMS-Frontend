@@ -2,6 +2,8 @@ import {
   MdFormatListBulleted,
   MdSearch,
   MdAdd,
+  MdEdit,
+  MdDelete,
 } from "react-icons/md";
 
 function FloorTabs({ activeTab, setActiveTab }) {
@@ -32,6 +34,24 @@ function FloorTabs({ activeTab, setActiveTab }) {
       >
         <MdAdd />
         <span>Add Floor</span>
+      </button>
+
+      <button
+        type="button"
+        className={`fm-tab-btn ${activeTab === "update" ? "active" : ""}`}
+        onClick={() => setActiveTab("update")}
+      >
+        <MdEdit />
+        <span>Update Floor</span>
+      </button>
+
+      <button
+        type="button"
+        className={`fm-tab-btn ${activeTab === "delete" ? "active" : ""}`}
+        onClick={() => setActiveTab("delete")}
+      >
+        <MdDelete />
+        <span>Delete Floor</span>
       </button>
     </div>
   );
