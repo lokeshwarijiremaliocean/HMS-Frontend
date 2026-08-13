@@ -27,7 +27,6 @@ function Sidebar({
   activeStudentTab = "all",
   onSelectStudentTab,
 }) {
-function Sidebar({ isOpen = true, activePage = "dashboard", activeStudentTab = "all", onSelectStudentTab }) {
   const navigate = useNavigate();
   const location = useLocation();
 
