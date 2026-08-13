@@ -1,9 +1,6 @@
 import { useState } from "react";
 
 import {
-  MdMenu,
-  MdNotifications,
-  MdKeyboardArrowDown,
   MdHome,
   MdSearch,
   MdDelete,
@@ -14,9 +11,42 @@ import {
 
 import Sidebar from "../dashboard/Sidebar";
 import Navbar from "../dashboard/Navbar";
-import { addHostel, searchHostel, deleteHostel } from "../../api/hostelApi";
+import { addHostel, getHostelByCode, deleteHostelById } from "../../api/hostelApi";
 
 import "../../styles/hostelManagement.css";
+
+// Helper to extract clean user-friendly error messages from backend responses
+const extractErrorMessage = (error, defaultMsg = "An error occurred.") => {
+  if (!error) return defaultMsg;
+
+  if (error.response?.data) {
+    const data = error.response.data;
+    if (typeof data.message === "string" && data.message.trim()) {
+      return data.message;
+    }
+    if (typeof data.detail === "string" && data.detail.trim()) {
+      return data.detail;
+    }
+    if (Array.isArray(data.detail) && data.detail.length > 0) {
+      const firstErr = data.detail[0];
+      if (typeof firstErr === "string") return firstErr;
+      if (firstErr?.msg) return firstErr.msg;
+    }
+  }
+
+  if (error.code === "ERR_NETWORK" || !error.response) {
+    return "Backend server is unavailable. Please check if backend server at http://127.0.0.1:8000 is running.";
+  }
+
+  if (error.response?.status === 401) {
+    return "Unauthorized. Please log in again.";
+  }
+  if (error.response?.status === 403) {
+    return "Forbidden. You do not have permission to perform this action.";
+  }
+
+  return error.message || defaultMsg;
+};
 
 function HostelManagement() {
   const [activeMode, setActiveMode] = useState("add"); // "add", "search", "delete"
@@ -32,7 +62,7 @@ function HostelManagement() {
   });
 
   const [searchCode, setSearchCode] = useState("");
-  const [deleteCode, setDeleteCode] = useState("");
+  const [deleteId, setDeleteId] = useState("");
 
   const [searchResult, setSearchResult] = useState(null);
 
@@ -52,29 +82,44 @@ function HostelManagement() {
     });
   };
 
-  // 1. Add Hostel Submit
+  // ─── 1. ADD HOSTEL ───
+  // POST /hostel/add with payload: { name, code, city, state, country }
   const handleAddSubmit = async (e) => {
     e.preventDefault();
+
+    if (loading) return; // Prevent duplicate submissions
+
+    const name = formData.hostelName.trim();
+    const code = formData.hostelCode.trim();
+    const city = formData.city.trim();
+    const state = formData.state.trim();
+    const country = formData.country.trim();
+
+    if (!name || !code || !city || !state || !country) {
+      setMessage({ type: "error", text: "Please fill in all required fields." });
+      return;
+    }
+
     setLoading(true);
     setMessage({ type: "", text: "" });
 
     try {
       const payload = {
-        name: formData.hostelName,
-        code: formData.hostelCode,
-        city: formData.city,
-        state: formData.state,
-        country: formData.country,
-        created_by: "Admin",
+        name,
+        code,
+        city,
+        state,
+        country,
       };
 
       const response = await addHostel(payload);
 
-      if (response.data && (response.data.success || response.data.message)) {
+      if (response.data && response.data.success !== false) {
         setMessage({
           type: "success",
           text: response.data.message || "Hostel added successfully!",
         });
+        // Clear/reset form after successful creation
         setFormData({
           hostelName: "",
           hostelCode: "",
@@ -90,59 +135,80 @@ function HostelManagement() {
       }
     } catch (error) {
       console.error("Add Hostel Error:", error);
-      const errMsg = error.response?.data?.detail
-        ? (Array.isArray(error.response.data.detail) ? error.response.data.detail[0]?.msg : error.response.data.detail)
-        : (error.response?.data?.message || "Error adding hostel.");
-      setMessage({ type: "error", text: errMsg });
+      setMessage({
+        type: "error",
+        text: extractErrorMessage(error, "Failed to add hostel. Please try again."),
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  // 2. Search Hostel Submit
+  // ─── 2. SEARCH HOSTEL ───
+  // GET /hostel/{hostel_code}
   const handleSearchSubmit = async (e) => {
     e.preventDefault();
-    if (!searchCode.trim()) return;
+
+    if (loading) return; // Prevent duplicate submissions
+
+    const codeToSearch = searchCode.trim();
+    if (!codeToSearch) {
+      setMessage({ type: "error", text: "Please enter a hostel code to search." });
+      return;
+    }
 
     setLoading(true);
     setMessage({ type: "", text: "" });
     setSearchResult(null);
 
     try {
-      const response = await searchHostel(searchCode);
+      const response = await getHostelByCode(codeToSearch);
+      const resData = response.data;
 
-      if (response.data && response.data.data) {
-        setSearchResult(response.data.data);
+      if (resData && resData.success !== false && (resData.data || resData.name || resData.id)) {
+        const hostelInfo = resData.data || resData;
+        setSearchResult(hostelInfo);
         setMessage({
           type: "success",
-          text: "Hostel details retrieved successfully!",
-        });
-      } else if (response.data) {
-        setSearchResult(response.data);
-        setMessage({
-          type: "success",
-          text: "Hostel found!",
+          text: resData.message || "Hostel details retrieved successfully!",
         });
       } else {
-        setMessage({ type: "error", text: "No hostel found with this code." });
+        setMessage({
+          type: "error",
+          text: resData?.message || `No hostel found with code "${codeToSearch}".`,
+        });
       }
     } catch (error) {
       console.error("Search Hostel Error:", error);
-      const errMsg = error.response?.data?.detail
-        ? (Array.isArray(error.response.data.detail) ? error.response.data.detail[0]?.msg : error.response.data.detail)
-        : (error.response?.data?.message || "Hostel not found or server endpoint unavailable.");
-      setMessage({ type: "error", text: errMsg });
+      const msg =
+        error.response?.status === 404
+          ? `Hostel not found with code "${codeToSearch}".`
+          : extractErrorMessage(error, "Error searching hostel.");
+      setMessage({ type: "error", text: msg });
     } finally {
       setLoading(false);
     }
   };
 
-  // 3. Delete Hostel Submit
+  // ─── 3. DELETE HOSTEL ───
+  // DELETE /hostel/{id} (Requires numeric hostel ID)
   const handleDeleteSubmit = async (e) => {
     e.preventDefault();
-    if (!deleteCode.trim()) return;
 
-    if (!window.confirm(`Are you sure you want to delete hostel: ${deleteCode}?`)) {
+    if (loading) return; // Prevent duplicate submissions
+
+    const idStr = deleteId.toString().trim();
+    const numericId = Number(idStr);
+
+    if (!idStr || isNaN(numericId) || numericId <= 0) {
+      setMessage({
+        type: "error",
+        text: "Please enter a valid numeric Hostel ID (integer, e.g. 1).",
+      });
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to delete Hostel ID: ${numericId}?`)) {
       return;
     }
 
@@ -150,26 +216,31 @@ function HostelManagement() {
     setMessage({ type: "", text: "" });
 
     try {
-      const response = await deleteHostel(deleteCode);
+      const response = await deleteHostelById(numericId);
+      const resData = response.data;
 
-      if (response.data && (response.data.success || response.data.message)) {
+      if (resData && resData.success !== false) {
         setMessage({
           type: "success",
-          text: response.data.message || `Hostel ${deleteCode} deleted successfully!`,
+          text: resData?.message || `Hostel ID ${numericId} deleted successfully!`,
         });
-        setDeleteCode("");
+        setDeleteId("");
+        if (searchResult && String(searchResult.id) === String(numericId)) {
+          setSearchResult(null);
+        }
       } else {
         setMessage({
           type: "error",
-          text: response.data?.message || "Failed to delete hostel.",
+          text: resData?.message || "Failed to delete hostel.",
         });
       }
     } catch (error) {
       console.error("Delete Hostel Error:", error);
-      const errMsg = error.response?.data?.detail
-        ? (Array.isArray(error.response.data.detail) ? error.response.data.detail[0]?.msg : error.response.data.detail)
-        : (error.response?.data?.message || "Error deleting hostel.");
-      setMessage({ type: "error", text: errMsg });
+      const msg =
+        error.response?.status === 404
+          ? `Hostel with ID "${numericId}" not found.`
+          : extractErrorMessage(error, "Error deleting hostel.");
+      setMessage({ type: "error", text: msg });
     } finally {
       setLoading(false);
     }
@@ -180,7 +251,7 @@ function HostelManagement() {
       <Sidebar isOpen={sidebarOpen} />
 
       <main className="hostel-management-main">
-        {/* Shared Navbar with 👤 Admin Profile and 🔔 Notification Bell */}
+        {/* Shared Navbar */}
         <Navbar
           title="Hostel Management"
           onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
@@ -231,7 +302,7 @@ function HostelManagement() {
             </div>
             <div className="hm-card-text">
               <h3>Delete Hostel</h3>
-              <p>Remove hostel by ID / Code</p>
+              <p>Remove hostel by ID</p>
             </div>
             <MdArrowForward className="hm-card-arrow" />
           </div>
@@ -267,7 +338,7 @@ function HostelManagement() {
                     <input
                       type="text"
                       name="hostelName"
-                      placeholder="Enter hostel name"
+                      placeholder="Enter hostel name (e.g. Campus2)"
                       value={formData.hostelName}
                       onChange={handleChange}
                       required
@@ -281,7 +352,7 @@ function HostelManagement() {
                     <input
                       type="text"
                       name="hostelCode"
-                      placeholder="Enter hostel code"
+                      placeholder="Enter hostel code (e.g. 0066)"
                       value={formData.hostelCode}
                       onChange={handleChange}
                       required
@@ -295,7 +366,7 @@ function HostelManagement() {
                     <input
                       type="text"
                       name="city"
-                      placeholder="Enter city"
+                      placeholder="Enter city (e.g. CSN)"
                       value={formData.city}
                       onChange={handleChange}
                       required
@@ -309,7 +380,7 @@ function HostelManagement() {
                     <input
                       type="text"
                       name="state"
-                      placeholder="Enter state"
+                      placeholder="Enter state (e.g. MH)"
                       value={formData.state}
                       onChange={handleChange}
                       required
@@ -323,7 +394,7 @@ function HostelManagement() {
                     <input
                       type="text"
                       name="country"
-                      placeholder="Enter country"
+                      placeholder="Enter country (e.g. IN)"
                       value={formData.country}
                       onChange={handleChange}
                       required
@@ -368,7 +439,7 @@ function HostelManagement() {
                     </label>
                     <input
                       type="text"
-                      placeholder="Enter hostel code (e.g. HSTL101)"
+                      placeholder="Enter hostel code (e.g. 0066)"
                       value={searchCode}
                       onChange={(e) => setSearchCode(e.target.value)}
                       required
@@ -394,6 +465,10 @@ function HostelManagement() {
                 <div className="hm-result-card">
                   <h3>Hostel Details</h3>
                   <div className="hm-result-grid">
+                    <div className="hm-result-item">
+                      <span className="label">ID</span>
+                      <span className="val">{searchResult.id || searchResult.hostel_id || "N/A"}</span>
+                    </div>
                     <div className="hm-result-item">
                       <span className="label">Name</span>
                       <span className="val">{searchResult.name || searchResult.hostel_name || "N/A"}</span>
@@ -430,7 +505,7 @@ function HostelManagement() {
                 <h2>Delete Hostel</h2>
               </div>
               <p className="hm-form-subtitle">
-                Remove a hostel by entering its unique code or ID
+                Remove a hostel by entering its numeric Hostel ID
               </p>
 
               {message.text && (
@@ -443,14 +518,15 @@ function HostelManagement() {
                 <div className="hm-form-grid">
                   <div className="hm-form-group full-width">
                     <label>
-                      Hostel Code / ID <span>*</span>
+                      Hostel ID <span>*</span>
                     </label>
                     <input
-                      type="text"
-                      placeholder="Enter hostel code or ID to delete"
-                      value={deleteCode}
-                      onChange={(e) => setDeleteCode(e.target.value)}
+                      type="number"
+                      placeholder="Enter numeric Hostel ID (integer, e.g. 1)"
+                      value={deleteId}
+                      onChange={(e) => setDeleteId(e.target.value)}
                       required
+                      min="1"
                     />
                   </div>
                 </div>

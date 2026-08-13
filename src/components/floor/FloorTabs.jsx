@@ -1,6 +1,5 @@
 import {
   MdFormatListBulleted,
-  MdSearch,
   MdAdd,
   MdEdit,
   MdDelete,
@@ -20,20 +19,38 @@ function FloorTabs({ activeTab, setActiveTab }) {
 
       <button
         type="button"
-        className={`fm-tab-btn ${activeTab === "search" ? "active" : ""}`}
-        onClick={() => setActiveTab("search")}
-      >
-        <MdSearch />
-        <span>Search Floors</span>
-      </button>
-
-      <button
-        type="button"
         className={`fm-tab-btn ${activeTab === "add" ? "active" : ""}`}
         onClick={() => setActiveTab("add")}
       >
         <MdAdd />
         <span>Add Floor</span>
+      </button>
+
+      <button
+        type="button"
+        className={`fm-tab-btn ${activeTab === "search" ? "active" : ""}`}
+        onClick={() => setActiveTab("search")}
+      >
+        <MdSearch />
+        <span>Search Floor</span>
+      </button>
+
+      <button
+        type="button"
+        className={`fm-tab-btn ${activeTab === "update" ? "active" : ""}`}
+        onClick={() => setActiveTab("update")}
+      >
+        <MdEdit />
+        <span>Update Floor</span>
+      </button>
+
+      <button
+        type="button"
+        className={`fm-tab-btn ${activeTab === "delete" ? "active" : ""}`}
+        onClick={() => setActiveTab("delete")}
+      >
+        <MdDelete />
+        <span>Delete Floor</span>
       </button>
 
       <button

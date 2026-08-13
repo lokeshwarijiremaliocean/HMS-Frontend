@@ -26,10 +26,20 @@ import DeleteRoom from "./DeleteRoom";
 import { getAllRooms } from "../../api/roomApi";
 import "../../styles/roomManagement.css";
 
+import { useLocation } from "react-router-dom";
+
 function RoomManagement() {
+  const location = useLocation();
   const [activeRoomTab, setActiveRoomTab] = useState("all");
   const [selectedRoomId, setSelectedRoomId] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  useEffect(() => {
+    if (location.state?.tab) {
+      const tab = location.state.tab;
+      setActiveRoomTab(tab === "search" ? "get" : tab);
+    }
+  }, [location.state]);
 
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -50,15 +60,19 @@ function RoomManagement() {
       let rawRooms = [];
       let studentList = [];
 
-      if (roomsRes.status === "fulfilled" && roomsRes.value.data) {
-        const resData = roomsRes.value.data;
-        if (Array.isArray(resData)) {
-          rawRooms = resData;
-        } else if (resData.success && Array.isArray(resData.data)) {
-          rawRooms = resData.data;
-        } else if (Array.isArray(resData.data)) {
-          rawRooms = resData.data;
+      if (roomsRes.status === "fulfilled" && roomsRes.value) {
+        const val = roomsRes.value;
+        if (Array.isArray(val)) {
+          rawRooms = val;
+        } else if (Array.isArray(val.data)) {
+          rawRooms = val.data;
+        } else if (val.data?.data && Array.isArray(val.data.data)) {
+          rawRooms = val.data.data;
+        } else if (val.data?.rooms && Array.isArray(val.data.rooms)) {
+          rawRooms = val.data.rooms;
         }
+      } else if (roomsRes.status === "rejected") {
+        console.warn("Failed to fetch rooms from backend:", roomsRes.reason);
       }
 
       if (studentRes.status === "fulfilled" && studentRes.value.data) {
@@ -79,35 +93,19 @@ function RoomManagement() {
         }
       });
 
-      // If backend returns empty room array, generate the physical 10 floors x 10 rooms infrastructure (100 rooms / 300 beds)
-      let roomSource = rawRooms;
-      if (roomSource.length === 0) {
-        roomSource = [];
-        for (let floor = 1; floor <= 10; floor++) {
-          for (let r = 1; r <= 10; r++) {
-            const roomNo = `${floor}${r < 10 ? "0" + r : r}`;
-            roomSource.push({
-              id: (floor - 1) * 10 + r,
-              floor_name: `Floor ${floor}`,
-              room_no: roomNo,
-              total_beds: 3,
-              occupied_beds: 0,
-            });
-          }
-        }
-      }
-
-      const formattedList = roomSource.map((r, i) => {
+      const formattedList = rawRooms.map((r, i) => {
         const totalBeds = Number(r.total_beds ?? r.totalBeds ?? 3);
         const roomNo = String(r.room_no || r.roomNo || r.id || i + 1);
         const occupiedBeds = Number(r.occupied_beds ?? r.occupiedBeds ?? (roomOccupancyMap[roomNo] || 0));
         const availableBeds = Math.max(0, totalBeds - occupiedBeds);
-        const floorName = r.floor_name || r.floor || (r.floor_id ? `Floor ${r.floor_id}` : "Floor 1");
+        const floorId = r.floor_id || r.floor_no || 1;
+        const floorDisplay = r.floor_name || r.floor || `F${floorId}`;
 
         return {
           id: r.id || i + 1,
           rawId: r.id,
-          floor: floorName,
+          floor_id: floorId,
+          floor: floorDisplay,
           roomNo,
           totalBeds,
           occupiedBeds,
@@ -134,7 +132,8 @@ function RoomManagement() {
   const totalBeds = rooms.reduce((acc, r) => acc + r.totalBeds, 0);
   const occupiedBeds = rooms.reduce((acc, r) => acc + r.occupiedBeds, 0);
   const availableBeds = rooms.reduce((acc, r) => acc + r.availableBeds, 0);
-  const totalFloors = new Set(rooms.map((r) => r.floor)).size;
+  const totalFloors = 10;
+
 
   // Handlers for child tabs
   const handleRoomAdded = () => {

@@ -22,6 +22,7 @@ import StudentDeleteModal from "../components/student/StudentDeleteModal";
 import StudentProfileCard from "../components/student/StudentProfileCard";
 
 import { getAllStudents } from "../api/studentApi";
+import { getAllRooms } from "../api/roomApi";
 import apiClient from "../api/axiosInstance";
 import { extractStudentList } from "../components/student/studentUtils";
 
@@ -88,14 +89,19 @@ function StudentManagement() {
 
     // 2. Fetch Rooms (for room capacity calculation if available)
     try {
-      const roomRes = await apiClient.get("/room");
-      const resData = roomRes.data?.data || roomRes.data;
-      if (Array.isArray(resData)) {
-        roomList = resData;
-      } else if (Array.isArray(resData?.rooms)) {
-        roomList = resData.rooms;
+      const roomRes = await getAllRooms();
+      if (roomRes) {
+        if (Array.isArray(roomRes)) {
+          roomList = roomRes;
+        } else if (Array.isArray(roomRes.data)) {
+          roomList = roomRes.data;
+        } else if (roomRes.data?.data && Array.isArray(roomRes.data.data)) {
+          roomList = roomRes.data.data;
+        } else if (roomRes.data?.rooms && Array.isArray(roomRes.data.rooms)) {
+          roomList = roomRes.data.rooms;
+        }
       }
-    } catch {
+    } catch (err) {
       // Ignore room fetch error if room API is not available or empty
     }
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MdAddCircleOutline, MdAdd, MdRefresh } from "react-icons/md";
 import { addRoom } from "../../api/roomApi";
 import { getApiErrorMessage } from "../../api/axiosInstance";
@@ -10,8 +10,47 @@ function AddRoom({ onRoomAdded }) {
     totalBeds: "",
   });
 
+  const [floorsList, setFloorsList] = useState(() =>
+    Array.from({ length: 10 }, (_, i) => ({
+      floor_id: i + 1,
+      display_name: `F${i + 1}`,
+    }))
+  );
+
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
+
+  useEffect(() => {
+    const fetchFloors = async () => {
+      try {
+        const res = await getAllFloors();
+        let dbFloors = [];
+        if (res) {
+          if (Array.isArray(res)) {
+            dbFloors = res;
+          } else if (Array.isArray(res.data)) {
+            dbFloors = res.data;
+          } else if (res.data?.data && Array.isArray(res.data.data)) {
+            dbFloors = res.data.data;
+          }
+        }
+        if (Array.isArray(dbFloors) && dbFloors.length > 0) {
+          const mapped = dbFloors.map((f) => {
+            const realId = Number(f.id ?? f.floor_id ?? f.floor_no);
+            const name = f.floor_name || `Floor ${f.floor_no || realId}`;
+            return {
+              floor_id: realId,
+              display_name: `${name} (ID: ${realId})`,
+            };
+          });
+          setFloorsList(mapped);
+        }
+      } catch (err) {
+        console.warn("Notice loading floors for room form:", err.message);
+      }
+    };
+    fetchFloors();
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -32,32 +71,52 @@ function AddRoom({ onRoomAdded }) {
       return;
     }
 
+    const bedsNum = Number(formData.totalBeds);
+    if (isNaN(bedsNum) || bedsNum <= 0) {
+      setMessage({ type: "error", text: "Total beds must be a positive number." });
+      return;
+    }
+
     setLoading(true);
     setMessage({ type: "", text: "" });
 
     try {
-      const floorId = parseInt(formData.floor.replace(/\D/g, "") || "1", 10);
       const payload = {
-        floor_id: floorId,
-        room_no: formData.roomNo,
-        total_beds: parseInt(formData.totalBeds, 10),
+        floor_id: Number(formData.floor),
+        room_no: String(formData.roomNo).trim(),
+        total_beds: bedsNum,
       };
 
       const res = await addRoom(payload);
 
-      if (res.data && (res.data.success || res.data.message)) {
-        setMessage({ type: "success", text: res.data.message || "Room added successfully" });
+      if (res.data && res.data.success === false) {
+        setMessage({
+          type: "error",
+          text: res.data.message || "Failed to add room",
+        });
       } else {
-        setMessage({ type: "success", text: "Room added successfully" });
+        setMessage({
+          type: "success",
+          text: res.data?.message || "Room added successfully",
+        });
+        setFormData({ floor: "", roomNo: "", totalBeds: "" });
+        if (onRoomAdded) {
+          onRoomAdded();
+        }
       }
-
-      if (onRoomAdded) {
-        onRoomAdded();
-      }
-
-      setFormData({ floor: "", roomNo: "", totalBeds: "" });
     } catch (err) {
       console.warn("Add Room Error:", err);
+      let errMsg =
+        err.response?.data?.message ||
+        (Array.isArray(err.response?.data?.detail)
+          ? err.response.data.detail[0]?.msg
+          : err.response?.data?.detail) ||
+        "Failed to add room.";
+
+      if (typeof errMsg === "string" && (errMsg.includes("foreign key") || errMsg.includes("room_floor_id_fkey"))) {
+        errMsg = `Selected Floor ID (${formData.floor}) does not exist in the database table 'floor'. Please select an existing floor or add the floor to database first.`;
+      }
+
       setMessage({
         type: "error",
         text: getApiErrorMessage(err, "Failed to add room."),
@@ -97,11 +156,11 @@ function AddRoom({ onRoomAdded }) {
             required
           >
             <option value="">Select Floor</option>
-            <option value="Floor 1">Floor 1</option>
-            <option value="Floor 2">Floor 2</option>
-            <option value="Floor 3">Floor 3</option>
-            <option value="Floor 4">Floor 4</option>
-            <option value="Floor 5">Floor 5</option>
+            {floorsList.map((f) => (
+              <option key={f.floor_id} value={f.floor_id}>
+                {f.display_name}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -142,6 +201,7 @@ function AddRoom({ onRoomAdded }) {
             type="button"
             className="rm-btn-reset"
             onClick={handleReset}
+            disabled={loading}
           >
             <MdRefresh /> Reset
           </button>
@@ -152,3 +212,4 @@ function AddRoom({ onRoomAdded }) {
 }
 
 export default AddRoom;
+

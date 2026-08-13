@@ -17,9 +17,7 @@ import "../../styles/floorManagement.css";
 
 function FloorManagement() {
   const location = useLocation();
-  const initialTab = location.state?.tab || "view";
-
-  const [activeTab, setActiveTab] = useState(initialTab);
+  const [activeTab, setActiveTab] = useState("view");
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // Backend state
@@ -79,6 +77,12 @@ function FloorManagement() {
       setActiveTab(location.state.tab);
     }
   }, [location.state?.tab]);
+
+  useEffect(() => {
+    if (location.state?.tab) {
+      setActiveTab(location.state.tab);
+    }
+  }, [location.state]);
 
   const handleSelectView = (floor) => {
     setSelectedFloor(floor);
@@ -151,6 +155,12 @@ function FloorManagement() {
           />
         )}
 
+        {activeTab === "add" && (
+          <AddFloor
+            onFloorAdded={handleFloorAdded}
+          />
+        )}
+
         {activeTab === "search" && (
           <SearchFloor
             floors={floors}
@@ -158,9 +168,17 @@ function FloorManagement() {
           />
         )}
 
-        {activeTab === "add" && (
-          <AddFloor
-            onFloorAdded={handleFloorAdded}
+        {activeTab === "update" && (
+          <UpdateFloor
+            floors={floors}
+            onFloorUpdated={handleFloorUpdated}
+          />
+        )}
+
+        {activeTab === "delete" && (
+          <DeleteFloor
+            floors={floors}
+            onFloorDeleted={handleFloorDeleted}
           />
         )}
 
