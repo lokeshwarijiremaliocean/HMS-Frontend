@@ -1,410 +1,433 @@
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-.page{
-    width:100vw;
-    height:100vh;
-
-    background:#F6DDDA;
-
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-
-    overflow:hidden;
+.page {
+    width: 100%;
+    height: 100vh;
+    background: #F6DDDA;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    overflow: hidden;
 }
 
-/* LEFT SIDE */
 
-.left-panel{
+/* =========================================================
+   LEFT SIDE / OVAL
+   ========================================================= */
 
-    width:25vw;
-    height:95vh;
+.left-panel {
+    width: 25vw;
+    max-width: none;
+    height: 90vh;
 
-    background:#4D1205;
+    background: #4D1205;
 
-    border-top-right-radius:80% 50%;
-    border-bottom-right-radius:80% 50%;
-display:flex;
-    
-    justify-content:center;
-    align-items:center;
+    border-top-right-radius: 80% 50%;
+    border-bottom-right-radius: 80% 50%;
 
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
+    padding: 20px;
+
+    flex-shrink: 0;
 }
 
-.logo{
-    width:430px;
+
+/* CAMPUSNEST LOGO */
+
+.logo {
+    width: 360px;
+    max-width: 90%;
+    height: auto;
+    object-fit: contain;
 }
 
-/* RIGHT CARD */
 
-.card{
+/* =========================================================
+   RIGHT WHITE CARD
+   ========================================================= */
 
-    width:800px;
-    height:800px;
+.card {
+    width: 580px;
+    height: 365px;
 
-    background:white;
+    max-width: 90%;
+    max-height: 85vh;
 
-    border-radius:18px;
+    background: white;
 
-    border:1px solid #444;
+    border-radius: 18px;
+    border: 1px solid #444;
 
-    box-shadow:0 4px 10px rgba(0,0,0,.20);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.20);
 
-    margin-right:80px;
-    margin-left:80px;
+    margin: 0 auto;
 
-    position:relative;
+    position: relative;
+
+    flex-shrink: 0;
 }
 
-/* HEADING */
 
-.card h1{
-    font-size:64px;
-    font-family:Georgia, serif;
-    font-weight:700;
+/* =========================================================
+   GENERAL HEADING
+   ========================================================= */
+
+.card h1 {
+    font-size: 38px;
+    font-family: Georgia, serif;
+    font-weight: 700;
 }
 
-/* INPUT */
 
-.input-field{
+/* =========================================================
+   EMAIL INPUT
+   ========================================================= */
 
-    position:absolute;
+.input-field {
+    position: absolute;
 
-    top:365px;
-    left:55px;
+    top: 155px;
+    left: 50%;
 
-    width:610px;
-    height:90px;
+    transform: translateX(-50%);
 
-    background:#F7CCCC;
+    width: 440px;
+    max-width: 85%;
 
-    border:1px solid #999;
+    height: 56px;
 
-    border-radius:18px;
+    background: #F7CCCC;
 
-    padding-left:30px;
+    border: 1px solid #999;
+    border-radius: 14px;
 
-    font-size:28px;
+    padding-left: 20px;
 
-    outline:none;
+    font-size: 18px;
 
-    box-shadow:0 4px 8px rgba(0,0,0,.15);
+    outline: none;
+
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-.input-field::placeholder{
-    color:#8E7575;
+.input-field::placeholder {
+    color: #8E7575;
 }
 
-/* BUTTON */
 
-.continue-btn{
+/* =========================================================
+   CONTINUE BUTTON
+   ========================================================= */
 
-    position:absolute;
+.continue-btn {
+    position: absolute;
 
-    top:560px;
+    top: 260px;
+    left: 50%;
 
-    left:50%;
+    transform: translateX(-50%);
 
-    transform:translateX(-50%);
+    width: 220px;
+    max-width: 80%;
 
-    width:340px;
+    height: 48px;
 
-    height:76px;
+    border: none;
+    border-radius: 30px;
 
-    border:none;
+    background: #8D2F2A;
+    color: #fff;
 
-    border-radius:40px;
+    font-size: 20px;
+    font-family: Georgia, serif;
 
-    background:#8D2F2A;
+    cursor: pointer;
 
-    color:#fff;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
 
-    font-size:30px;
-
-    font-family:Georgia, serif;
-
-    cursor:pointer;
-
-    box-shadow:0 5px 10px rgba(0,0,0,.15);
-
-    transition:.3s;
+    transition: 0.3s;
 }
 
-.continue-btn:hover{
-    background:#742521;
+.continue-btn:hover {
+    background: #742521;
 }
 
-/* ================= EMAIL PAGE ================= */
 
-.email-title{
-    position:absolute;
+/* =========================================================
+   EMAIL PAGE
+   ========================================================= */
 
-    top:140px;
+.email-title {
+    position: absolute;
 
-    left:50%;
+    top: 45px;
+    left: 50%;
 
-    transform:translateX(-50%);
+    transform: translateX(-50%);
 
-    width:100%;
+    width: 100%;
 
-    text-align:center;
+    text-align: center;
 
-    font-size:64px;
-
-    font-family:Georgia, serif;
-
-    font-weight:700;
+    font-size: 38px;
+    font-family: Georgia, serif;
+    font-weight: 700;
 }
 
-.input-field{
 
-    position:absolute;
+/* =========================================================
+   OTP PAGE
+   ========================================================= */
 
-    top:320px;
+.otp-card {
+    display: flex;
+    flex-direction: column;
 
-    left:50%;
+    justify-content: center;
+    align-items: center;
 
-    transform:translateX(-50%);
+    width: 580px;
+    height: 365px;
 
-    width:610px;
-    height:90px;
-
-    background:#F7CCCC;
-
-    border:1px solid #999;
-
-    border-radius:18px;
-
-    padding-left:30px;
-
-    font-size:28px;
-
-    outline:none;
-
-    box-shadow:0 4px 8px rgba(0,0,0,.15);
+    padding: 20px;
 }
 
-/* ================= OTP PAGE ================= */
 
-.otp-card{
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
+.otp-title {
+    font-size: 38px;
+
+    font-family: Georgia, serif;
+    font-weight: 700;
+
+    margin-bottom: 25px;
 }
 
-.otp-title{
-    font-size:72px;
-    font-family:Georgia, serif;
-    font-weight:700;
-    margin-bottom:70px;
+
+.otp-boxes {
+    display: flex;
+
+    justify-content: center;
+    align-items: center;
+
+    gap: 16px;
+
+    margin-bottom: 25px;
 }
 
-.otp-boxes{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    gap:40px;
-    margin-bottom:70px;
+
+.otp-input {
+    width: 60px;
+    height: 84px;
+
+    background: #F7CCCC;
+
+    border: 2px solid #555;
+    border-radius: 14px;
+
+    font-size: 36px;
+
+    text-align: center;
+
+    outline: none;
+
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.18);
 }
 
-.otp-input{
-    width:110px;
-    height:165px;
 
-    background:#F7CCCC;
-
-    border:2px solid #555;
-    border-radius:22px;
-
-    font-size:60px;
-    text-align:center;
-
-    outline:none;
-
-    box-shadow:0 5px 10px rgba(0,0,0,.18);
+.otp-input:focus {
+    border-color: #8D2F2A;
 }
 
-.otp-input:focus{
-    border-color:#8D2F2A;
+
+.verify-btn {
+    width: 220px;
+    height: 48px;
+
+    border: none;
+    border-radius: 30px;
+
+    background: #8D2F2A;
+    color: white;
+
+    font-size: 20px;
+    font-family: Georgia, serif;
+
+    cursor: pointer;
+
+    margin-top: 5px;
 }
 
-.verify-btn{
 
-    width:330px;
-    height:72px;
-
-    border:none;
-
-    border-radius:40px;
-
-    background:#8D2F2A;
-
-    color:white;
-
-    font-size:30px;
-
-    font-family:Georgia, serif;
-
-    cursor:pointer;
-
-    margin-top:20px;
+.verify-btn:hover {
+    background: #742521;
 }
 
-.verify-btn:hover{
-    background:#742521;
+
+.resend {
+    margin-top: 15px;
+
+    font-size: 18px;
+
+    font-family: Georgia, serif;
+
+    text-decoration: underline;
+
+    cursor: pointer;
 }
 
-.resend{
 
-    margin-top:35px;
+/* =========================================================
+   CREATE ACCOUNT / REGISTER PAGE
+   ========================================================= */
 
-    font-size:34px;
+.register-card {
+    display: flex;
 
-    font-family:Georgia, serif;
+    flex-direction: column;
 
-    text-decoration:underline;
+    align-items: center;
+    justify-content: center;
 
-    cursor:pointer;
+    width: 580px;
+    height: 365px;
+
+    padding: 20px 0;
 }
 
-/* ================= REGISTER PAGE ================= */
 
-.register-card{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:flex-start;
-    padding-top:60px;
+.register-title {
+    font-size: 32px;
+
+    font-family: Georgia, serif;
+    font-weight: 700;
+
+    margin-bottom: 18px;
 }
 
-.register-title{
-    font-size:64px;
-    font-family:Georgia, serif;
-    font-weight:700;
-    margin-bottom:60px;
+
+.register-form {
+    width: 440px;
+    max-width: 85%;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 12px;
 }
 
-.register-form{
-    width:680px;
-    display:flex;
-    flex-direction:column;
-    gap:25px;
+
+.register-input {
+    width: 100%;
+    height: 48px;
+
+    background: #F7CCCC;
+
+    border: 1px solid #999;
+    border-radius: 12px;
+
+    padding-left: 18px;
+
+    font-size: 16px;
+
+    outline: none;
+
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-.register-input{
-    width:100%;
-    height:90px;
 
-    background:#F7CCCC;
-
-    border:1px solid #999;
-    border-radius:18px;
-
-    padding-left:30px;
-
-    font-size:28px;
-
-    outline:none;
-
-    box-shadow:0 4px 8px rgba(0,0,0,.15);
+.register-input::placeholder {
+    color: #8E7575;
 }
 
-.register-input::placeholder{
-    color:#8E7575;
+
+.register-btn {
+    width: 220px;
+    height: 46px;
+
+    margin: 10px auto 0;
+
+    border: none;
+    border-radius: 30px;
+
+    background: #8D2F2A;
+    color: white;
+
+    font-size: 18px;
+    font-family: Georgia, serif;
+
+    cursor: pointer;
 }
 
-.register-btn{
-    width:340px;
-    height:72px;
 
-    margin:30px auto 0;
-
-    border:none;
-    border-radius:40px;
-
-    background:#8D2F2A;
-
-    color:white;
-
-    font-size:30px;
-    font-family:Georgia, serif;
-
-    cursor:pointer;
+.register-btn:hover {
+    background: #742521;
 }
 
-.register-btn:hover{
-    background:#742521;
-}/* ================= REGISTER PAGE ================= */
 
-.register-card{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:flex-start;
-    padding-top:60px;
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1000px) {
+
+    .page {
+        justify-content: center;
+        gap: 20px;
+    }
+
+    .left-panel {
+        width: 25vw;
+    }
+
+    .logo {
+        width: 300px;
+        max-width: 90%;
+    }
+
+    .card,
+    .otp-card,
+    .register-card {
+        width: 580px;
+        max-width: 65vw;
+    }
 }
 
-.register-title{
-    font-size:64px;
-    font-family:Georgia, serif;
-    font-weight:700;
-    margin-bottom:60px;
-}
 
-.register-form{
-    width:680px;
-    display:flex;
-    flex-direction:column;
-    gap:25px;
-}
+@media (max-width: 768px) {
 
-.register-input{
-    width:100%;
-    height:90px;
+    .page {
+        flex-direction: column;
+        justify-content: center;
+        gap: 20px;
 
-    background:#F7CCCC;
+        overflow-y: auto;
+    }
 
-    border:1px solid #999;
-    border-radius:18px;
+    .left-panel {
+        width: 90%;
+        max-width: 400px;
 
-    padding-left:30px;
+        height: 220px;
 
-    font-size:28px;
+        border-radius: 50%;
+    }
 
-    outline:none;
+    .logo {
+        width: 300px;
+        max-width: 80%;
+    }
 
-    box-shadow:0 4px 8px rgba(0,0,0,.15);
-}
-
-.register-input::placeholder{
-    color:#8E7575;
-}
-
-.register-btn{
-    width:340px;
-    height:72px;
-
-    margin:30px auto 0;
-
-    border:none;
-    border-radius:40px;
-
-    background:#8D2F2A;
-
-    color:white;
-
-    font-size:30px;
-    font-family:Georgia, serif;
-
-    cursor:pointer;
-}
-
-.register-btn:hover{
-    background:#742521;
+    .card,
+    .otp-card,
+    .register-card {
+        width: 90%;
+        max-width: 580px;
+    }
 }
