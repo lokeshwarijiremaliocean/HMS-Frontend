@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { MdAddCircleOutline, MdAdd, MdRefresh } from "react-icons/md";
 import { addRoom } from "../../api/roomApi";
-import { getAllFloors } from "../../api/floorApi";
+import { getApiErrorMessage } from "../../api/axiosInstance";
 
 function AddRoom({ onRoomAdded }) {
   const [formData, setFormData] = useState({
@@ -119,7 +119,7 @@ function AddRoom({ onRoomAdded }) {
 
       setMessage({
         type: "error",
-        text: errMsg,
+        text: getApiErrorMessage(err, "Failed to add room."),
       });
     } finally {
       setLoading(false);

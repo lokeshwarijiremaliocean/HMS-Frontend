@@ -6,72 +6,101 @@ import {
   MdHotel,
   MdTag,
   MdCheckCircle,
-  MdPerson,
+  MdErrorOutline,
 } from "react-icons/md";
+import { addFloor } from "../../api/floorApi";
+import { getAuthToken, getApiErrorMessage } from "../../api/axiosInstance";
 
 function AddFloor({ onFloorAdded }) {
   const [formData, setFormData] = useState({
-    hostel_id: "101",
+    hostel_id: "",
     floor_no: "",
     floor_name: "",
-    is_active: true,
-    created_by: "Admin",
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: value,
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.floor_name || formData.floor_no === "") {
-      alert("Please fill in the Floor No and Floor Name.");
+    setErrorMessage("");
+    setToastMessage("");
+
+    // Check if token exists in session
+    const currentToken = getAuthToken();
+    if (!currentToken) {
+      setErrorMessage("No authentication token found. Please log in to obtain a valid backend session.");
       return;
     }
 
-    const newFloor = {
-      id: Math.floor(100 + Math.random() * 900),
-      hostel_id: parseInt(formData.hostel_id || "101", 10),
-      floor_no: parseInt(formData.floor_no || "0", 10),
-      floor_name: formData.floor_name.trim(),
-      is_active: formData.is_active === true || formData.is_active === "true",
-      created_by: formData.created_by || "Admin",
-    };
-
-    if (onFloorAdded) {
-      onFloorAdded(newFloor);
+    if (!formData.floor_name.trim() || formData.floor_no === "" || formData.hostel_id === "") {
+      setErrorMessage("Please fill in Hostel ID, Floor No, and Floor Name.");
+      return;
     }
 
-    setToastMessage(`Floor "${newFloor.floor_name}" added successfully (UI Demo)!`);
-    setTimeout(() => {
-      setToastMessage("");
-    }, 4000);
+    const payload = {
+      hostel_id: parseInt(formData.hostel_id, 10),
+      floor_no: parseInt(formData.floor_no, 10),
+      floor_name: formData.floor_name.trim(),
+    };
 
-    // Reset form
-    setFormData({
-      hostel_id: "101",
-      floor_no: "",
-      floor_name: "",
-      is_active: true,
-      created_by: "Admin",
-    });
+    if (isNaN(payload.hostel_id) || isNaN(payload.floor_no)) {
+      setErrorMessage("Hostel ID and Floor No must be valid numbers.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const response = await addFloor(payload);
+
+      if (response.data && (response.data.success || response.status === 200)) {
+        const addedFloor = response.data.data;
+        const successMsg = response.data.message || `Floor "${payload.floor_name}" added successfully!`;
+        setToastMessage(successMsg);
+
+        // Reset form
+        setFormData({
+          hostel_id: "",
+          floor_no: "",
+          floor_name: "",
+        });
+
+        if (onFloorAdded) {
+          await onFloorAdded(addedFloor);
+        }
+
+        setTimeout(() => {
+          setToastMessage("");
+        }, 4000);
+      } else {
+        setErrorMessage(response.data?.message || "Failed to add floor.");
+      }
+    } catch (err) {
+      console.error("Error adding floor:", err);
+      const msg = getApiErrorMessage(err, "Failed to add floor.");
+      setErrorMessage(msg);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleReset = () => {
     setFormData({
-      hostel_id: "101",
+      hostel_id: "",
       floor_no: "",
       floor_name: "",
-      is_active: true,
-      created_by: "Admin",
     });
     setToastMessage("");
+    setErrorMessage("");
   };
 
   return (
@@ -89,10 +118,19 @@ function AddFloor({ onFloorAdded }) {
         </div>
       </div>
 
+      {/* Success Toast */}
       {toastMessage && (
         <div className="fm-toast-alert success">
           <MdCheckCircle style={{ fontSize: "20px" }} />
           <span>{toastMessage}</span>
+        </div>
+      )}
+
+      {/* Error Toast */}
+      {errorMessage && (
+        <div className="fm-toast-alert error">
+          <MdErrorOutline style={{ fontSize: "20px" }} />
+          <span>{errorMessage}</span>
         </div>
       )}
 
@@ -101,7 +139,7 @@ function AddFloor({ onFloorAdded }) {
         <div className="fm-form-grid">
           {/* Hostel ID */}
           <div className="fm-form-group">
-            <label htmlFor="add-hostel-id">Hostel ID</label>
+            <label htmlFor="add-hostel-id">Hostel ID *</label>
             <div className="fm-input-wrapper">
               <MdHotel />
               <input
@@ -109,17 +147,18 @@ function AddFloor({ onFloorAdded }) {
                 type="number"
                 name="hostel_id"
                 className="fm-input"
-                placeholder="e.g. 101"
+                placeholder="e.g. 1"
                 value={formData.hostel_id}
                 onChange={handleChange}
                 required
+                disabled={isSubmitting}
               />
             </div>
           </div>
 
           {/* Floor No */}
           <div className="fm-form-group">
-            <label htmlFor="add-floor-no">Floor No.</label>
+            <label htmlFor="add-floor-no">Floor No. *</label>
             <div className="fm-input-wrapper">
               <MdTag />
               <input
@@ -131,13 +170,14 @@ function AddFloor({ onFloorAdded }) {
                 value={formData.floor_no}
                 onChange={handleChange}
                 required
+                disabled={isSubmitting}
               />
             </div>
           </div>
 
           {/* Floor Name */}
           <div className="fm-form-group">
-            <label htmlFor="add-floor-name">Floor Name</label>
+            <label htmlFor="add-floor-name">Floor Name *</label>
             <div className="fm-input-wrapper">
               <MdApartment />
               <input
@@ -149,40 +189,9 @@ function AddFloor({ onFloorAdded }) {
                 value={formData.floor_name}
                 onChange={handleChange}
                 required
+                disabled={isSubmitting}
               />
             </div>
-          </div>
-
-          {/* Created By */}
-          <div className="fm-form-group">
-            <label htmlFor="add-created-by">Created By</label>
-            <div className="fm-input-wrapper">
-              <MdPerson />
-              <input
-                id="add-created-by"
-                type="text"
-                name="created_by"
-                className="fm-input"
-                placeholder="e.g. Admin"
-                value={formData.created_by}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
-
-          {/* Status */}
-          <div className="fm-form-group">
-            <label htmlFor="add-status">Status</label>
-            <select
-              id="add-status"
-              name="is_active"
-              className="fm-select"
-              value={formData.is_active}
-              onChange={handleChange}
-            >
-              <option value="true">Active</option>
-              <option value="false">Inactive</option>
-            </select>
           </div>
         </div>
 
@@ -192,6 +201,7 @@ function AddFloor({ onFloorAdded }) {
             type="button"
             className="fm-btn-clear"
             onClick={handleReset}
+            disabled={isSubmitting}
           >
             <MdRefresh />
             <span>Reset</span>
@@ -200,9 +210,10 @@ function AddFloor({ onFloorAdded }) {
           <button
             type="submit"
             className="fm-btn-search"
+            disabled={isSubmitting}
           >
             <MdAdd />
-            <span>Save Floor</span>
+            <span>{isSubmitting ? "Saving Floor..." : "Save Floor"}</span>
           </button>
         </div>
       </form>

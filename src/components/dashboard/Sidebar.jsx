@@ -242,14 +242,21 @@ function Sidebar({
         </div>
 
         <div
-          className={`menu-item ${isFloorPage && activeFloorTab === "delete" ? "active" : ""}`}
+          className={`menu-item ${activePage === "floorManagement" && activeFloorTab === "update" ? "active" : ""}`}
+          onClick={() => handleFloorTabClick("update")}
+        >
+          <MdEdit />
+          <span>Update Floor</span>
+        </div>
+
+        <div
+          className={`menu-item ${activePage === "floorManagement" && activeFloorTab === "delete" ? "active" : ""}`}
           onClick={() => handleFloorTabClick("delete")}
         >
           <MdDelete />
           <span>Delete Floor</span>
         </div>
 
-        {/* BED MANAGEMENT */}
         <h4>
           BED MANAGEMENT
           <MdKeyboardArrowDown className="arrow" />

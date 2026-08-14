@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   MdSearch,
   MdRefresh,
@@ -7,49 +7,124 @@ import {
   MdHotel,
   MdVisibility,
   MdFilterAlt,
+  MdErrorOutline,
 } from "react-icons/md";
+import { getFloorByName, getAllFloors } from "../../api/floorApi";
+import { getAuthToken, getApiErrorMessage } from "../../api/axiosInstance";
 
 function SearchFloor({ floors = [], onSelectView }) {
-  const [floorIdQuery, setFloorIdQuery] = useState("");
+  const [floorNoQuery, setFloorNoQuery] = useState("");
   const [floorNameQuery, setFloorNameQuery] = useState("");
   const [hostelIdQuery, setHostelIdQuery] = useState("");
 
-  // Search state
   const [hasSearched, setHasSearched] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState(floors);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  // UI-only search action
-  const handleSearch = (e) => {
+  // Sync initial floors if floors prop changes and user hasn't searched
+  useEffect(() => {
+    if (!hasSearched) {
+      setSearchResults(floors);
+    }
+  }, [floors, hasSearched]);
+
+  const handleSearch = async (e) => {
     if (e) e.preventDefault();
     setHasSearched(true);
+    setErrorMessage("");
 
-    const fId = floorIdQuery.trim().toLowerCase();
-    const fName = floorNameQuery.trim().toLowerCase();
-    const hId = hostelIdQuery.trim().toLowerCase();
-
-    // If no search filter is entered, show all floors
-    if (!fId && !fName && !hId) {
-      setSearchResults(floors);
+    const token = getAuthToken();
+    if (!token) {
+      setErrorMessage("No authentication token found. Please log in from the home screen to search floors.");
+      setSearchResults([]);
       return;
     }
 
-    const filtered = floors.filter((floor) => {
-      const matchId = !fId || String(floor.id ?? "").toLowerCase().includes(fId);
-      const matchName = !fName || String(floor.floor_name ?? "").toLowerCase().includes(fName);
-      const matchHostel = !hId || String(floor.hostel_id ?? "").toLowerCase().includes(hId);
+    setIsSearching(true);
 
-      return matchId && matchName && matchHostel;
-    });
+    const fNo = floorNoQuery.trim();
+    const fName = floorNameQuery.trim();
+    const hId = hostelIdQuery.trim();
 
-    setSearchResults(filtered);
+    // If no search filter is entered, load all active floors from backend
+    if (!fNo && !fName && !hId) {
+      try {
+        const res = await getAllFloors();
+        const list = Array.isArray(res.data?.data) ? res.data.data : [];
+        setSearchResults(list);
+      } catch (err) {
+        if (err.response?.status === 404) {
+          setSearchResults([]);
+        } else {
+          setErrorMessage(err.response?.data?.message || "Failed to retrieve floors.");
+          setSearchResults([]);
+        }
+      } finally {
+        setIsSearching(false);
+      }
+      return;
+    }
+
+    // Single-field search by name: use backend GET /floor/name?floor_name=...
+    if (fName && !fNo && !hId) {
+      try {
+        const res = await getFloorByName(fName);
+        if (res.data?.data) {
+          setSearchResults([res.data.data]);
+        } else {
+          setSearchResults([]);
+        }
+      } catch (err) {
+        if (err.response?.status === 404) {
+          setSearchResults([]);
+        } else if (err.response?.status === 401) {
+          setErrorMessage("Invalid or expired authentication token. Please log in again to refresh your session.");
+          setSearchResults([]);
+        } else {
+          console.error("Error searching floor by name:", err);
+          setErrorMessage(err.response?.data?.message || "Floor not found.");
+          setSearchResults([]);
+        }
+      } finally {
+        setIsSearching(false);
+      }
+      return;
+    }
+
+    // Floor No, Hostel ID, or Multi-criteria search: fetch /floors and filter in-memory with AND logic
+    try {
+      const res = await getAllFloors();
+      const allFloors = Array.isArray(res.data?.data) ? res.data.data : [];
+
+      const filtered = allFloors.filter((floor) => {
+        const matchNo = !fNo || String(floor.floor_no) === fNo;
+        const matchName = !fName || String(floor.floor_name || "").toLowerCase().includes(fName.toLowerCase());
+        const matchHostel = !hId || String(floor.hostel_id) === hId;
+
+        return matchNo && matchName && matchHostel;
+      });
+
+      setSearchResults(filtered);
+    } catch (err) {
+      if (err.response?.status === 404) {
+        setSearchResults([]);
+      } else {
+        console.error("Error filtering floors:", err);
+        setErrorMessage(getApiErrorMessage(err, "Failed to search floors."));
+        setSearchResults([]);
+      }
+    } finally {
+      setIsSearching(false);
+    }
   };
 
-  // UI-only clear action
   const handleClear = () => {
-    setFloorIdQuery("");
+    setFloorNoQuery("");
     setFloorNameQuery("");
     setHostelIdQuery("");
     setHasSearched(false);
+    setErrorMessage("");
     setSearchResults(floors);
   };
 
@@ -63,10 +138,18 @@ function SearchFloor({ floors = [], onSelectView }) {
           </div>
           <div>
             <h3>Search Floors</h3>
-            <p>Filter and locate floor records by Floor ID, Floor Name, or Hostel ID</p>
+            <p>Filter and locate floor records by Floor No, Floor Name, or Hostel ID</p>
           </div>
         </div>
       </div>
+
+      {/* Error Toast */}
+      {errorMessage && (
+        <div className="fm-toast-alert error">
+          <MdErrorOutline style={{ fontSize: "20px" }} />
+          <span>{errorMessage}</span>
+        </div>
+      )}
 
       {/* Search & Filter Card */}
       <div className="fm-search-panel">
@@ -77,18 +160,19 @@ function SearchFloor({ floors = [], onSelectView }) {
 
         <form onSubmit={handleSearch}>
           <div className="fm-search-grid">
-            {/* Search by Floor ID */}
+            {/* Search by Floor No */}
             <div className="fm-form-group">
-              <label htmlFor="search-floor-id">Floor ID</label>
+              <label htmlFor="search-floor-no">Floor No.</label>
               <div className="fm-input-wrapper">
                 <MdTag />
                 <input
-                  id="search-floor-id"
-                  type="text"
+                  id="search-floor-no"
+                  type="number"
                   className="fm-input"
                   placeholder="e.g. 1, 2, 3..."
-                  value={floorIdQuery}
-                  onChange={(e) => setFloorIdQuery(e.target.value)}
+                  value={floorNoQuery}
+                  onChange={(e) => setFloorNoQuery(e.target.value)}
+                  disabled={isSearching}
                 />
               </div>
             </div>
@@ -105,11 +189,12 @@ function SearchFloor({ floors = [], onSelectView }) {
                   placeholder="e.g. Ground Floor, First Floor..."
                   value={floorNameQuery}
                   onChange={(e) => setFloorNameQuery(e.target.value)}
+                  disabled={isSearching}
                 />
               </div>
             </div>
 
-            {/* Optional Hostel ID Filter */}
+            {/* Search by Hostel ID */}
             <div className="fm-form-group">
               <label htmlFor="search-hostel-id">
                 Hostel ID <span className="optional-tag">(Optional)</span>
@@ -118,11 +203,12 @@ function SearchFloor({ floors = [], onSelectView }) {
                 <MdHotel />
                 <input
                   id="search-hostel-id"
-                  type="text"
+                  type="number"
                   className="fm-input"
-                  placeholder="e.g. 101, 102..."
+                  placeholder="e.g. 1, 2..."
                   value={hostelIdQuery}
                   onChange={(e) => setHostelIdQuery(e.target.value)}
+                  disabled={isSearching}
                 />
               </div>
             </div>
@@ -134,6 +220,7 @@ function SearchFloor({ floors = [], onSelectView }) {
               type="button"
               className="fm-btn-clear"
               onClick={handleClear}
+              disabled={isSearching}
             >
               <MdRefresh />
               <span>Clear</span>
@@ -142,16 +229,22 @@ function SearchFloor({ floors = [], onSelectView }) {
             <button
               type="submit"
               className="fm-btn-search"
+              disabled={isSearching}
             >
               <MdSearch />
-              <span>Search</span>
+              <span>{isSearching ? "Searching..." : "Search"}</span>
             </button>
           </div>
         </form>
       </div>
 
-      {/* Search Results Area */}
-      {searchResults.length > 0 ? (
+      {/* Loading State */}
+      {isSearching ? (
+        <div className="fm-loading-container">
+          <div className="fm-spinner"></div>
+          <span>Searching floors from backend...</span>
+        </div>
+      ) : searchResults.length > 0 ? (
         <>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>
             <h4 style={{ fontSize: "15px", fontWeight: "600", color: "#334155", margin: 0 }}>
