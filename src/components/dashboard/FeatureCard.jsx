@@ -11,17 +11,10 @@ function FeatureCard({
 
   const routes = {
     Hostel: "/hostel",
-    Building: "/building",
     Floor: "/floor",
     Room: "/room",
     "Bed Info": "/bed",
-    Student: "/student",
-    "Electricity Bill": "/bill",
-    "Room Unassigned": "/unassigned",
-    "Mess Head": "/mess-head",
-    "Mess Routine": "/mess-routine",
-    "Mess Menu": "/mess-menu",
-    "Other Details": "/details",
+    Student: "/student-management",
   };
 
   return (

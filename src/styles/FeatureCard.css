@@ -1,176 +1,190 @@
 /* ===================================
-   FEATURE CARD
+   FEATURE CARD (ORIGINAL COMPACT CLASSIC)
 =================================== */
 
-.feature-card{
-    border-radius:14px;
-    overflow:hidden;
-    cursor:pointer;
-    transition:.3s;
-    display:flex;
-    flex-direction:column;
-    justify-content:space-between;
-    box-shadow:0 5px 15px rgba(0,0,0,.18);
+.feature-card {
+    border-radius: 14px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.18);
 }
 
-.feature-card:hover{
-    transform:translateY(-6px);
-    box-shadow:0 15px 28px rgba(0,0,0,.25);
+.feature-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 15px 28px rgba(0, 0, 0, 0.25);
 }
 
 /* ===================================
-   CARD COLORS
+   CARD COLORS & GRADIENTS
 =================================== */
 
-.hostel-card{
-    background:#d77b82;
+.hostel-card {
+    background: linear-gradient(135deg, #d77b82 0%, #b8545b 100%);
 }
 
-.bed-card{
-    background:#78d2e5;
+.floor-card {
+    background: linear-gradient(135deg, #4f9edb 0%, #2976b3 100%);
 }
 
-.mess-card{
-    background:#e93b50;
+.room-card {
+    background: linear-gradient(135deg, #51b887 0%, #288f60 100%);
+}
+
+.bed-card {
+    background: linear-gradient(135deg, #78d2e5 0%, #46acc4 100%);
+}
+
+.student-card {
+    background: linear-gradient(135deg, #9678e7 0%, #6e4bc7 100%);
 }
 
 /* ===================================
    TOP AREA
 =================================== */
 
-.feature-top{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:20px;
-    height:140px;
+.feature-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    height: 140px;
 }
 
 /* ===================================
-   TEXT
+   TEXT (LEFT SIDE)
 =================================== */
 
-.feature-text h3{
-    margin:0;
-    color:white;
-    font-size:34px;
-    font-weight:500;
+.feature-text h3 {
+    margin: 0;
+    color: #ffffff;
+    font-size: 34px;
+    font-weight: 500;
 }
 
-.feature-text p{
-    margin-top:6px;
-    color:white;
-    font-size:18px;
+.feature-text p {
+    margin-top: 6px;
+    color: #ffffff;
+    font-size: 18px;
 }
 
 /* ===================================
-   IMAGE
+   IMAGE / ICON (RIGHT SIDE)
 =================================== */
 
-.feature-image{
-    width:100px;
-    height:100px;
-    object-fit:contain;
-    opacity:.35;
-    transition:.3s;
+.feature-image {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    opacity: 0.35;
+    transition: 0.3s;
 }
 
-.feature-card:hover .feature-image{
-    opacity:.55;
-    transform:scale(1.08);
+.feature-card:hover .feature-image {
+    opacity: 0.55;
+    transform: scale(1.08);
 }
 
 /* ===================================
-   FOOTER
+   FOOTER BUTTON
 =================================== */
 
-.feature-btn{
-    width:100%;
-    height:52px;
-    border:none;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:12px;
-    font-size:18px;
-    font-weight:600;
-    cursor:pointer;
-    transition:.3s;
+.feature-btn {
+    width: 100%;
+    height: 52px;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
 }
 
-/* Hostel Footer */
+/* Card Specific Footer Colors */
 
-.hostel-card .feature-btn{
-    background:#ebb169;
-    color:#000;
+.hostel-card .feature-btn {
+    background: #ebb169;
+    color: #000;
 }
 
-/* Bed Footer */
-
-.bed-card .feature-btn{
-    background:#9678e7;
-    color:white;
+.floor-card .feature-btn {
+    background: #1f3750;
+    color: #ffffff;
 }
 
-/* Mess Footer */
+.room-card .feature-btn {
+    background: #1d4d37;
+    color: #ffffff;
+}
 
-.mess-card .feature-btn{
-    background:#f26a63;
-    color:white;
+.bed-card .feature-btn {
+    background: #5c3eb3;
+    color: #ffffff;
+}
+
+.student-card .feature-btn {
+    background: #f26a8d;
+    color: #ffffff;
 }
 
 /* Hover */
 
-.feature-btn:hover{
-    letter-spacing:.4px;
+.feature-btn:hover {
+    letter-spacing: 0.4px;
 }
 
-.feature-btn svg{
-    transition:.3s;
+.feature-btn svg {
+    transition: 0.3s;
 }
 
-.feature-card:hover svg{
-    transform:translateX(5px);
+.feature-card:hover svg {
+    transform: translateX(5px);
 }
 
 /* ===================================
    RESPONSIVE
 =================================== */
 
-@media(max-width:1200px){
+@media (max-width: 1200px) {
 
-.feature-top{
-height:120px;
+    .feature-top {
+        height: 120px;
+    }
+
+    .feature-text h3 {
+        font-size: 28px;
+    }
+
+    .feature-image {
+        width: 80px;
+        height: 80px;
+    }
+
 }
 
-.feature-text h3{
-font-size:28px;
-}
+@media (max-width: 768px) {
 
-.feature-image{
-width:80px;
-height:80px;
-}
+    .feature-text h3 {
+        font-size: 22px;
+    }
 
-}
+    .feature-text p {
+        font-size: 15px;
+    }
 
-@media(max-width:768px){
+    .feature-image {
+        width: 65px;
+        height: 65px;
+    }
 
-.feature-text h3{
-font-size:22px;
-}
-
-.feature-text p{
-font-size:15px;
-}
-
-.feature-image{
-width:65px;
-height:65px;
-}
-
-.feature-btn{
-font-size:15px;
-}
+    .feature-btn {
+        font-size: 15px;
+    }
 
 }

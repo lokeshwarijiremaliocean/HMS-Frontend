@@ -1,16 +1,41 @@
-import axios from "axios";
-
-const API = "http://127.0.0.1:8000";
+import apiClient from "./axiosInstance";
 
 export const sendOTP = async (email) => {
-  return axios.post(`${API}/send-otp`, {
-    email,
-  });
+  try {
+    return await apiClient.post("/send-otp", { email });
+  } catch (err) {
+    if (err.response?.status === 422 || err.response?.status === 404 || err.response?.status === 405) {
+      try {
+        return await apiClient.post(`/send-otp?email=${encodeURIComponent(email)}`);
+      } catch (err2) {
+        try {
+          return await apiClient.get(`/send-otp?email=${encodeURIComponent(email)}`);
+        } catch (err3) {
+          throw err;
+        }
+      }
+    }
+    throw err;
+  }
 };
 
 export const verifyOTP = async (email, otp) => {
-  return axios.post(`${API}/verify-otp`, {
-    email,
-    otp,
-  });
+  try {
+    return await apiClient.post("/verify-otp", { email, otp });
+  } catch (err) {
+    if (err.response?.status === 422 || err.response?.status === 404 || err.response?.status === 405) {
+      try {
+        return await apiClient.post(`/verify-otp?email=${encodeURIComponent(email)}&otp=${encodeURIComponent(otp)}`);
+      } catch (err2) {
+        throw err;
+      }
+    }
+    throw err;
+  }
 };
+
+export const registerAdmin = async (adminData) => {
+  return apiClient.post("/admin", adminData);
+};
+
+export default apiClient;

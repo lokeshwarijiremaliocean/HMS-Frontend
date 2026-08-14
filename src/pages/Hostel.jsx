@@ -1,12 +1,7 @@
-import HeroSection from "../components/hostel/HeroSection";
-import "../styles/hostel.css";
+import HostelManagement from "../components/hostel/HostelManagement";
 
 function Hostel() {
-  return (
-    <div className="hostel-page">
-      <HeroSection />
-    </div>
-  );
+  return <HostelManagement />;
 }
 
-export default Hostel;
+export default Hostel;
